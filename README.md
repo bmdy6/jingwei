@@ -102,6 +102,6 @@ CI 默认使用 GitHub 托管 Ubuntu 和 Python 3.12 安装依赖并运行离线
 
 ## 来源与许可
 
-代码从 [bmdy5/Xl-General-AI-Agent](https://github.com/bmdy5/Xl-General-AI-Agent) 的 `ec8e1436e9c532dfce7afe92bd23b9286d562bbe` 快照导出，未携带旧 Git 历史；旧归档、个人记忆及本地配置未迁入。代码中保留了参考 Hermes 等项目的说明。
+代码从作者早期的个人仓库导出，未携带旧 Git 历史；旧归档、个人记忆及本地配置未迁入。代码中保留了参考 Hermes 等项目的说明。
 
 本仓库采用 [MIT License](LICENSE)。外部模型权重与第三方素材的许可由各自来源决定。
