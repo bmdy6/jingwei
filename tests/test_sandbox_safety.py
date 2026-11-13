@@ -62,9 +62,9 @@ def test_write_and_edit_tool_needs_permissions():
     e_tool = EditFileTool()
 
     # 写入保护区
-    assert w_tool.needs_permissions({"file_path": "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/agent/core/agent.py"}) is True
-    assert e_tool.needs_permissions({"file_path": "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/main.py"}) is True
+    assert w_tool.needs_permissions({"file_path": str(Path(__file__).parents[1] / "agent/core/agent.py")}) is True
+    assert e_tool.needs_permissions({"file_path": str(Path(__file__).parents[1] / "main.py")}) is True
 
     # 写入安全区
-    assert w_tool.needs_permissions({"file_path": "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/logs/test.log"}) is False
-    assert e_tool.needs_permissions({"file_path": "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/logs/agent_activity.log"}) is False
+    assert w_tool.needs_permissions({"file_path": str(Path(__file__).parents[1] / "logs/test.log")}) is False
+    assert e_tool.needs_permissions({"file_path": str(Path(__file__).parents[1] / "logs/agent_activity.log")}) is False

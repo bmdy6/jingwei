@@ -66,7 +66,8 @@ class MCPClientTool(BaseTool):
     ) -> AsyncGenerator[ToolResult, None]:
         action = input_args["action"]
         server_cmd = input_args["server_command"]
-        cmd = server_cmd.split()
+        import shlex
+        cmd = shlex.split(server_cmd)
 
         transport = StdioTransport(cmd)
         client = MCPClient(transport)

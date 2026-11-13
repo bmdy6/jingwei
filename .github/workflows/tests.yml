@@ -1,0 +1,26 @@
+name: tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  pytest:
+    # Optional self-hosted label; the default remains GitHub-hosted Ubuntu.
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: runner.environment == 'github-hosted'
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install CPU PyTorch
+        if: runner.os == 'Linux'
+        run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Install dependencies
+        run: python -m pip install --quiet -r requirements.txt -r requirements-dev.txt
+      - name: Run offline tests
+        run: python -m pytest -q

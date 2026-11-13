@@ -145,12 +145,12 @@ async def test_agent_long_session_and_compressor():
     msgs = await handler.load_messages()
     assert len(msgs) == 60
     
-    compressor = ContextCompressor(llm=llm, max_tokens=1000, threshold=0.1)
-    compressed_msgs, was_compressed = await compressor.compress(msgs)
-    assert was_compressed, "Should successfully compress messages"
-    assert len(compressed_msgs) < len(msgs), "Compressor should shrink context"
-    assert compressed_msgs[0]["role"] == "system"
-    
+    # Compression was removed; the remaining helper estimates token usage only.
+    compressor = ContextCompressor(llm=llm, max_tokens=1000)
+    assert compressor.estimate_tokens(msgs) > 0
+    assert compressor.compress_at == 0
+    assert len(await handler.load_messages()) == 60
+
     block = await agent._build_memory_block(user_input="极简MVC有什么要求？", turn=31)
     assert "Who You Are (User Profile)" in block
     assert "极简 MVC" in block

@@ -1,6 +1,7 @@
+from agent.core.paths import runtime_path, PROJECT_ROOT
 """笔记知识库 FTS5 索引 — PageIndex 全文检索（不切块）。
 
-索引 /path/to/user/Desktop/学习笔记/ 下的 .md 文件。
+索引 配置的笔记目录 下的 .md 文件。
 每个文件一行，BM25 全文匹配，LLM 用 read_file 精读结果。
 """
 
@@ -14,7 +15,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-NOTES_DIR = Path("/path/to/user/Desktop/学习笔记")
+NOTES_DIR = runtime_path("MYAGENT_NOTES_DIR", "notes")
 
 # 使用 100% 绝对无乱码的显式 Unicode 转义码点范围
 _CJK_RE = re.compile(r'([\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef])')
@@ -35,11 +36,8 @@ def _restore_cjk(text: str) -> str:
 
 def create_table(conn: sqlite3.Connection):
     """创建 PageIndex FTS5 表和 metadata 伴随表。"""
-    conn.execute("""
-        CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts
-        USING fts5(content, title, path, directory,
-                   tokenize="porter unicode61")
-    """)
+    from .fts_index import create_search_table
+    create_search_table(conn, "notes_fts", ("content", "title", "path", "directory"), "porter unicode61")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS notes_meta (
             path TEXT PRIMARY KEY,

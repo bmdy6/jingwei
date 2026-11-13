@@ -12,34 +12,20 @@ import asyncio
 import pytest
 from PIL import Image
 from unittest.mock import AsyncMock, MagicMock, patch
-from agent.tools.visual_tools import (
-    draw_pink_pointer,
-    BrowserScreenshotTool,
-    BrowserClickTool,
-    BrowserTypeTool,
-    BrowserScrollTool
-)
+from agent.tools.visual_tools import BrowserAgentTool
 from agent.net_gateway.dispatcher import MessageDispatcher
 from agent.net_gateway.context import GatewayContext
 from agent.tools.base_tool import ToolResult
 
 
-# ── 用例 1: 校验纯 PIL 算法粉色心形指针绘制的鲁棒性与输出格式 ──
-def test_visual_pil_pink_pointer_drawing():
-    # 建立一个 1280x800 的测试用纯白底图
-    img = Image.new("RGB", (1280, 800), (255, 255, 255))
-    output = io.BytesIO()
-    img.save(output, format="PNG")
-    b64_raw = base64.b64encode(output.getvalue()).decode("utf-8")
-    
-    # 模拟在视口中央 (640, 400) 处绘制粉色心形定位指针
-    new_b64 = draw_pink_pointer(b64_raw, 640, 400)
-    
-    # 解码合并后的图片，并验证其仍然是 1280x800 PNG 格式且成功渲染
-    img_data = base64.b64decode(new_b64)
-    img_healed = Image.open(io.BytesIO(img_data))
-    assert img_healed.size == (1280, 800)
-    assert img_healed.format == "PNG"
+@pytest.mark.asyncio
+async def test_browser_agent_requires_task_and_llm():
+    tool = BrowserAgentTool()
+    assert tool.needs_permissions({"task": "example"})
+    assert not (await tool.validate_input({}))["result"]
+    assert (await tool.validate_input({"task": "example"}))["result"]
+    results = [r async for r in tool.call({"task": "example"})]
+    assert "未绑定LLM" in results[0].data
 
 
 # ── 用例 2: 校验 QQ 全局审批消息劫持拦截器 (MessageDispatcher.dispatch_event) ──
@@ -97,50 +83,14 @@ async def test_qq_approval_message_global_hijack():
     assert agent.approval_future.result() is True
 
 
-# ── 用例 3: 模拟卡片审批拒绝及 120 秒超时退避 ──
 @pytest.mark.asyncio
-async def test_visual_click_tool_denied_and_timeout():
+async def test_browser_agent_passes_task_and_returns_result():
+    tool = BrowserAgentTool()
     agent = MagicMock()
-    loop = asyncio.get_running_loop()
-    agent.approval_future = loop.create_future()
-    
-    click_tool = BrowserClickTool()
-    
-    # 模拟 aiohttp HTTP RPC 请求和 QQ 消息推送
-    with patch("agent.tools.visual_tools.call_vision_gateway", new_callable=AsyncMock) as mock_gateway, \
-         patch("agent.tools.visual_tools.send_qq_notification", new_callable=AsyncMock) as mock_qq:
-         
-         # 制造一个测试底图的 base64
-         img = Image.new("RGB", (100, 100))
-         output = io.BytesIO()
-         img.save(output, format="PNG")
-         b64 = base64.b64encode(output.getvalue()).decode("utf-8")
-         mock_gateway.return_value = b64
-         
-         # 1. 模拟亮哥拒绝授权（n）的流程
-         async def mock_denied_wait():
-             await asyncio.sleep(0.05)
-             agent.approval_future.set_result(False) # 模拟亮哥回复 n
-             
-         loop.create_task(mock_denied_wait())
-         
-         # 触发 click 工具
-         results = []
-         async for r in click_tool.call({"port": 9000, "x": 50, "y": 50}, context=agent):
-             results.append(r)
-             
-         # 校验在亮哥拒绝时，抛出拒签错误且不执行网关 click 动作
-         assert "UserInterrupted: 亮哥明确拒绝了点击动作" in results[0].data
-         assert mock_gateway.call_count == 1 # 只有 screenshot，没有 click 调用
-         
-         # 2. 模拟审批超时熔断降级
-         agent.approval_future = loop.create_future()
-         
-         # 重新 Mock 使得 wait_for 捕获到超时
-         with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError):
-             results_timeout = []
-             async for r in click_tool.call({"port": 9000, "x": 50, "y": 50}, context=agent):
-                 results_timeout.append(r)
-             
-             # 校验在审批超时后，抛出超时熔断，且网关 click 动作未被拉起
-             assert "UserInterrupted: QQ 审批回复超时" in results_timeout[0].data
+    visual = AsyncMock()
+    visual.execute.return_value = {"success": False, "steps": 1, "error": "cancelled", "history": []}
+    with patch("agent.core.visual_agent.VisualAgent") as factory:
+        factory.return_value.__aenter__.return_value = visual
+        results = [r async for r in tool.call({"task": "read page", "cdp_url": "http://localhost:9222"}, agent)]
+    visual.execute.assert_awaited_once_with(task="read page")
+    assert json.loads(results[0].data)["error"] == "cancelled"

@@ -191,7 +191,7 @@ async def test_react_prefix_purification():
     assert sent_msgs[-1]["content"] == "开始执行净化测试"
     
     # 黄金断言 3: agent.messages 在被 llm_chat 处理后，其 User 消息依然保持纯净，没有被物理重写
-    assert agent.messages[0]["content"] == "开始执行净化测试"
+    assert [m["content"] for m in agent.messages if m["role"] == "user"] == ["开始执行净化测试"]
 
 
 # ── 用例 5: 校验 llm.py 在非标准流式下对非空 choices 数据帧所携带 usage 的精准提取与去重 ──
@@ -341,7 +341,7 @@ async def test_json_repair_safety_sandboxing_分流():
         async def _apply_sliding_window_and_scratchpad(self):
             pass
         def _create_tracked_task(self, coro):
-            pass
+            coro.close()
             
     # 用例 2a: 只读工具 read_file 发生 arguments 截断 ➔ 应当自愈成功
     read_tc = [{

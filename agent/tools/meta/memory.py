@@ -332,6 +332,9 @@ async def _find_similar_memory(mm, new_desc: str, new_filename: str) -> dict | N
     """Find an existing memory with similar topic (not just filename match)."""
     try:
         entries = mm._parse_index()
+        db = mm._get_db()
+        for ki_id, title, keywords in db.execute("SELECT id, title, keywords FROM knowledge_items"):
+            entries.append({"filename": f"ki_{ki_id}.md", "description": title, "keywords": keywords})
         new_keywords = set((new_desc or "").lower().split())
         new_stem = (new_filename or "").replace(".md", "").lower()
 
@@ -340,7 +343,7 @@ async def _find_similar_memory(mm, new_desc: str, new_filename: str) -> dict | N
             desc = (e.get("description") or "").lower()
 
             # Same filename → exact match
-            if fname == new_stem:
+            if fname == new_stem or f'"{new_stem}"' in e.get("keywords", ""):
                 content = await mm.get_entry(e["filename"])
                 if content:
                     return {

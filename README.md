@@ -1,167 +1,103 @@
-# XL Agent — 工业级通用异步 AI 智能体代理
+# XL Agent
 
-基于经典 ReAct 决策双循环构建的高性能通用 AI 智能体代理（XL Agent）。系统支持运行时动态工具调用、多层降级长期记忆检索、多 Agent 蜂群协作、自适应规则进化，并配备了基于 CSMA/CD 载波监听/冲突检测的消息流控避让网关与基于 Token 过载度量的休眠冷却机制。
+A Python agent with tool execution, local memory, and an optional message gateway.
 
----
+XL Agent 是一个可在终端运行的个人 Agent 项目：把自然语言请求交给模型，通过工具读写文件、执行命令，并保存会话和检索相关记忆。它适合学习 Agent 的编排与记忆实现，或作为个人自动化的起点。
 
-## 快速开始
-
-可以通过终端 CLI 工具进行单次对话、交互式会话、启动监控面板或开启自动学习模式：
+在仓库根目录执行以下三条命令（本轮验证环境为 Python 3.12）：
 
 ```bash
-xl "你好"              # 单次命令行对话
-xl                    # 交互模式（支持 /exit 退出，支持历史上下文压缩）
-xl --dashboard       # 极简终端监控面板，实时观测 Agent 运行负荷
-xl --auto-learn      # 自动学习与规则进化模式
-bash bin/start.sh    # 统一启动自愈中枢，一键拉起网关及所有依赖
+python3.12 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
+cp .env.example .env
+.venv/bin/python main.py "只回复：你好"
 ```
 
----
+执行第三条前，在 `.env` 中填写自己的 `DEEPSEEK_API_KEY`。默认使用 `deepseek/deepseek-chat`；本轮已用 DeepSeek 实测 `main.py` 和 `./xl` 单次对话。模型请求由你配置的服务计费。QQ 默认关闭。
 
-## 消息网关控制与防死锁系统 (CSMA/CD ＆ Fatigue)
+## 已验证的核心行为
 
-为了在生产环境（例如高频群聊、Bot 间并发交互、高并发私聊）中规避消息连发引起的无限死锁、大模型 Token 资源恶意过载、发言被抢占中断等工程问题，XL Agent 引入了工业级的消息路由流控引擎：
+- **ReAct 循环**：模型返回工具调用，注册表执行工具并将结果交回模型，直到回答或达到 `MYAGENT_MAX_TURNS`。默认最大步数为 30；步数不等于请求费用上限，重试、子任务和复盘可能增加调用。
+- **运行时工具注册**：`ToolRegistry` 支持注册、注销、生成调用定义、校验参数和派发。`manage_tool` 提供运行时管理入口。工具注册及本地文件调用有离线测试。
+- **会话与长期记忆**：会话保存为 JSONL，并建立 SQLite 全文索引；长期知识保存在 SQLite，结合 FTS5 和本地 m3e-base 向量检索。FTS5 不可用时降级为关键词匹配。本地模型缺失或加载失败时保留关键词检索，不自动下载模型。本轮另用准备好的 m3e-base 权重验证了非零向量生成、SQLite 向量保存和一次检索往返；未做召回质量评测。
+- **会话后复盘**：`on_session_end` 尝试提炼反馈、知识和重复任务模式；反馈规则写入 `agent_memory/skills/自学习技能/规则与偏好.md`，后续加入系统提示词。流程、存储和注入使用模拟模型验证；不承诺自动提炼的质量。
+- **消息网关**：同一会话的连发消息在静默窗口内合并，推理期间的新消息可中断旧处理；按用量累计负载并触发冷却。离线测试覆盖这些场景，真实 QQ 收发需单独配置和验收。
+- **MCP 客户端**：通过 stdio 初始化服务器、列出工具并调用工具。用本地独立 MCP 测试进程验证了完整往返。代码也保留 HTTP 适配，但本轮未验收外部 HTTP MCP 服务。
 
-### 1. 载波监听与退避协议 (Carrier Sense)
-* **监听顺延**：当收到发言请求时，系统不立刻启动大模型推理协程，而是进入 `QQ_CSMA_BACKOFF_SECONDS`（默认 2.0s）的退避等待期。
-* **合并去重**：若对方在等待期内连续发送消息，等待定时器会自动向后延展。只有当信道连续静默 2.0 秒（即发言流结束）后，网关才正式合并文本并启动推理。前序并发请求所关联的未完成协程将被自动销毁，节约计算资源。
+## 工具清单
 
-### 2. 冲突检测与暂存避让 (Collision Detection)
-* **两阶段中断丢弃**：在大模型流式推理生成中途，或在向渠道发送缓冲消息的最后时刻，如果检测到对方在此期间又发送了新消息（即信道抢占），智能体将立刻中断大模型运行，并清空发送缓冲区，避免冲突响应。
-* **并发避让**：当大模型正在调用高耗时工具（如图像生成、长代码执行）时，新涌入的消息将在暂存队列中避让，防止上下文时序错乱。
+以下名称来自默认 `build_agent()` 的实际注册表。注册成功不代表每项外部服务已联通。
 
-### 3. Token 精准过载计费与休眠冷却反思机制 (Nap Mode)
-* **Token 精准疲劳度计费**：非管理员用户的请求会根据其回复 Token 数量乘以 `QQ_FATIGUE_RATE` 系数累加系统疲劳值（该值会以每分钟 2.0% 的速度衰减）。
-* **系统休眠冷却**：疲劳值触及 100.0% 的安全水位线时，智能体将输出系统过载冷却提示，随后进入持续 15 分钟（`QQ_FATIGUE_SLEEP_MINUTES`）的物理休眠期。
-* **休眠期离线反思**：休眠期间自动屏蔽对该用户的消息响应，同时异步调度反思引擎，归纳近期交互知识并将其持久化归并至进化规则库中。冷却期结束后自动恢复在线服务状态。
+| 用途 | 默认注册工具 |
+| --- | --- |
+| 文件与命令 | `read_file`、`write_file`、`edit_file`、`bash` |
+| 任务编排 | `spawn_agent`、`swarm`、`run_sequence`、`schedule_task` |
+| 工具与记忆管理 | `manage_tool`、`save_memory`、`organize_notes`、`record_skill_usage` |
+| 网页 | `web_search`、`web_fetch` |
+| 媒体与浏览器 | `read_image`、`image2_generate`、`browser_agent` |
+| MCP 与外部集成 | `mcp_client`、`stitch_generate`、`notebooklm`、`xiaohongshu` |
 
-### 4. 管理员特权通道与强穿透控制
-* **一键启停指令**：超级管理员可在控制端发送 "暂停私聊" 和 "恢复私聊" 指令，一键物理冻结或解冻非管理员用户的私聊网关。
-* **特权唤醒穿透**：即使系统处于休眠冷却或业务挂起状态，超级管理员的消息均能实现 100% 强穿透，强制唤醒推理引擎并执行响应。
+仅在 `QQ_ENABLED=true` 时额外注册 `get_qq_status`、`send_qq_message`、`send_image_to_qq`。Stitch、NotebookLM、小红书、图片和浏览器工具需要各自的服务、认证或浏览器调试连接；本轮没有完成这些外部服务的端到端验收。
 
-> [!IMPORTANT]
-> 关于该网关更深度的状态机设计及集成测试验证，请查阅 [docs/architecture/GATEWAY_CSMA_FATIGUE.md](docs/architecture/GATEWAY_CSMA_FATIGUE.md)。
+## 架构与目录
 
----
-
-## 记忆与自我审视系统
-
-本智能体的记忆系统由轻量级纯本地向量库与运行时元认知审视机制组成：
-
-### 1. 两层记忆模型
-* **情景记忆 (FTS5 全文搜索)**：自动将工具调用和交互上下文持久化至 SQLite，并利用 SQLite FTS5 建立全文倒排索引（针对 CJK 中文分词进行优化），检索时若无 FTS5 则平滑降写为 LIKE 模糊匹配。
-* **长效知识库 (文档自动索引)**：系统采用惰性加载模式，首次调用时异步分块扫描读取指定学习文档，作为相关背景知识注入大模型上下文。
-
-### 2. 纯离线免费本地向量化 (Local m3e-base)
-* 在 `config/settings.yaml` 中将 `EMBEDDING_MODE` 设为 `local` 时，智能体会自动在本地 CPU 上惰性加载 `m3e-base` 编码模型。
-* 首次加载自动利用 HuggingFace 国内镜像源拉取，完全在本地完成 768 维稠密实数向量的嵌入和 SQLite 特征存储，确保数据隐私安全。
-
-### 3. 元认知物理环境自主审视 (Metacognition Self-Reflection)
-* **拒绝生硬规则响应**：为了使智能体在面对“系统当前是否启用向量库？”、“当前使用的模型与 API 密钥是什么？”等涉及自身物理配置的问题时，不依赖预设硬编码文本。
-* **知行合一**：遇到涉及自身运行配置的问题，智能体将第一顺序自主调用 `read_file` 工具读取并解析 `config/settings.yaml` 或相关核心代码（如 `agent/memory/manager.py`），以底层真实配置状态作为事实基础生成严谨的客观回答。
-
----
-
-## 中央参数配置参考 (config/settings.yaml)
-
-项目中央配置采用 YAML 规范全解耦设计，调优时无需修改任何 Python 逻辑：
-
-* `MYAGENT_MODEL`: 大模型驱动模型定义（遵循 LiteLLM 规范，默认为 `deepseek/deepseek-v4-flash`）
-* `MYAGENT_MAX_TURNS`: 限制单次 ReAct 会话的最深决策步数，防范无限递归
-* `QQ_ADMIN_ID`: 管理员（超级用户）的唯一身份标识，具备最高优先权与免疲劳豁免
-* `QQ_CSMA_BACKOFF_SECONDS`: 载波监听避让秒数，高频交互场景下可适当调高以增强消息合并率
-* `QQ_FATIGUE_SLEEP_MINUTES`: 疲劳过载后的休眠冷却时间（分钟）
-* `QQ_FATIGUE_RATE`: 回复疲劳计费扣分系数，值设为 0 代表关闭疲劳控制
-* `EMBEDDING_MODE`: 向量化嵌入模式，可选 `local`（纯本地免费）或 `cloud`（远程 API 服务）
-
----
-
-## 工具系统
-
-XL Agent 拥有功能完备的工具箱，由 `ToolRegistry` 统一注册，支持运行时动态管理：
-
-* `read_file`: 读取物理文件内容（用于环境自我审视与代码审计）
-* `write_file`: 新建或覆盖物理文件内容
-* `edit_file`: 搜索替换与精准局部编辑
-* `bash`: 执行系统 shell 终端指令（提供沙箱级执行环境）
-* `web_search`: 联网进行实时网页搜索
-* `web_fetch`: 网页正文深度爬取与解析（去除冗余 HTML 标签）
-* `spawn_agent`: 派生子 Agent 并发运行（实现任务分工下发）
-* `swarm`: 蜂群协作（任务拆解与多 Worker 结果聚合）
-* `mcp_client`: 挂载外部 Standard MCP 服务以扩展外部生态工具
-* `save_memory`: 长期记忆库的增删改查与检索维护
-
----
-
-## 进化与自动优化引擎
-
-智能体能够在每次会话结束后进行自愈复盘与优化审计：
-
-```
-交互完成 ──> 触发 tool_audit ──> 检测任务 Pattern ──> 提炼并归并 KI ──> 规则自进化 ──> 动态注入 System Prompt
+```mermaid
+flowchart TD
+    CLI[main.py / xl] --> Boot[bootstrap: 配置与工具组装]
+    QQ[可选 OneBot 网关] --> Boot
+    Boot --> Agent[Agent / ReAct loop]
+    Agent <--> LLM[LiteLLM / 模型服务]
+    Agent <--> Tools[ToolRegistry / 本地工具与 MCP]
+    Agent <--> Memory[会话 JSONL / SQLite FTS5 / 本地向量]
+    Agent --> Reflection[会话后反馈与规则提炼]
+    Reflection --> Rules[运行时规则文件]
+    Rules --> Agent
 ```
 
-* `EvolutionEngine`：负责追溯每一次工具成功率与耗时表现，发现低效或异常操作后，从反馈记忆中生成去重规则，持久化于自进化库中，并在系统下一次初始化时动态注入大模型提示词。
+| 路径 | 内容 |
+| --- | --- |
+| `agent/core/` | Agent 状态、ReAct、配置、模型接口与提示词 |
+| `agent/tools/` | 注册表及文件、网页、媒体、编排、QQ、MCP 工具 |
+| `agent/memory/`、`agent/session/` | 长期知识、向量与全文检索、会话持久化 |
+| `agent/evolution/`、`agent/skills/` | 复盘、规则、经验与技能管理 |
+| `agent/net_gateway/` | 消息接入、合并、输出与冷却 |
+| `agent/runner/`、`agent/ui/` | 运行入口、终端与实验界面 |
+| `config/settings.yaml`、`.env.example` | 默认配置与本地凭据模板 |
+| `agent_memory/` | 运行时资产目录；仓库只保留空目录标记 |
+| `tests/`、`.github/workflows/` | 离线测试与 CI |
+| `docs/architecture/` | 当前架构说明与明确标注的历史设计提案 |
+| `bin/`、`control/`、`agent/systemd/` | 需要自行检查配置的可选启动与服务模板 |
 
----
+## 配置与数据位置
 
-## 项目模块解耦架构 (物理极简 ＆ 高内聚)
+配置优先级为：进程环境变量 > `.env` > `config/settings.yaml`。凭据只写入本地 `.env` 或环境变量；不要提交会话、数据库、日志和登录数据。
 
-全系统经过模块化微服务重构，避免臃肿耦合，每个核心代码文件均控制在 400 行以内：
+默认长期记忆位于 `~/.xl-agent/memory`，会话位于 `~/.xl-agent/sessions`；技能和规则位于项目的 `agent_memory/`。目录在需要时创建，项目内记忆备份默认关闭。可以通过 `.env.example` 中的路径变量重定向数据。默认不读取任何个人笔记目录。
 
-```
-.
-├── main.py                     - 极简 CLI 路由启动器 (<40行)
-├── requirements.txt            - 依赖包声明
-├── config/
-│   └── settings.yaml          - 全量统一解耦配置文件 (集中收拢)
-├── bin/
-│   ├── start.sh               - 统一启动自愈中枢
-│   ├── start-agent.sh         - 轻量代理 Wrapper
-│   └── 启动QQAgent.command     - 桌面双击代理 Wrapper
-├── docs/
-│   ├── superpowers/specs/     - 系统重构与微服务设计文档集
-│   └── architecture/          - 架构控制与说明文档
-└── agent/
-    ├── core.py                 - Agent 外观 Facade 决策中心 (<360行)
-    ├── config.py               - YAML 配置管理器
-    ├── bootstrap.py            - 系统环境初始化与工具自动组装
-    ├── llm.py                  - 统一 LiteLLM 驱动器
-    ├── react_loop.py           - ReAct 决策推理大循环
-    ├── prompt_builder.py       - 动态提示词与上下文组装
-    ├── tts.py                  - 语音合成向下兼容接口
-    ├── voice/
-    │   └── tts.py             - 语音合成组件 (解耦自网关)
-    ├── net_gateway/
-    │   ├── bot.py             - WebSocket 连接与 OneBot 适配
-    │   ├── executor.py        - 异步网关指令并发执行器
-    │   ├── dispatcher.py      - 管道执行器
-    │   └── middleware/
-    │       ├── base.py        - 中间件基类
-    │       └── pipeline.py    - 11 大高内聚中间件流水线
-    ├── evolution/
-    │   ├── base.py            - 自进化与工具审计调度中枢
-    │   ├── dream.py           - 异步离线反思合并
-    │   ├── rules.py           - 规则自进化生成
-    │   └── sop.py             - 任务 SOP 模式提取
-    ├── skills/
-    │   └── manager.py         - 技能动态注册与使用状态监控
-    └── memory/
-        ├── manager.py         - 长期记忆延迟加载 Facade 代理
-        ├── store.py           - 记忆文件 I/O 与 GC 回收
-        ├── index.py           - SQLite 表结构与向量嵌入
-        ├── ki.py              - 长期知识库 KI 提炼与合并
-        ├── context.py         - 混合 RAG 双通道全文检索
-        └── session.py         - 用户特征画像合成
-```
+要使用本地向量检索，先自行准备 m3e-base 模型，放入 `model/m3e-base`，或修改 YAML 的 `memory.local_model_path`。模型权重不随代码分发。`EMBEDDING_MODE=cloud` 是可选在线模式，需要 embedding 服务凭据并可能额外计费。
 
----
+要启用 QQ，设置 `QQ_ENABLED=true`、`QQ_ADMIN_ID`、NapCat 地址与令牌，再按需填写用户和群白名单，运行 `python main.py --gateway`。详见[网关说明](docs/architecture/GATEWAY_CSMA_FATIGUE.md)。普通 CLI 使用 `python main.py` 进入交互模式；`./xl "问题"` 是单次入口。
 
-## 静态校验与单元测试
-
-为了确保修改不引起任何核心功能回归，请在部署前运行单元测试套件：
+## 测试
 
 ```bash
-# 运行回归单元测试套件，核验核心指标
-PYTHONPATH=. venv/bin/pytest tests
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pytest -q
 ```
+
+CI 默认使用 GitHub 托管 Ubuntu 和 Python 3.12 安装依赖并运行离线测试，不需要真实 key。也可通过仓库变量 `CI_RUNNER` 指定预装 Python 3.12 的自托管 runner 标签。测试拦截网络连接，并将记忆和会话放入临时目录。真实 QQ 联通用例明确跳过，需要登录账号、OneBot、模型和语音服务，不能算作离线验证通过。
+
+## 已知限制
+
+- 本轮只用少量 DeepSeek 请求确认单次文字对话，未测量长期稳定性、吞吐量、成本节省或回答正确率。
+- `bash`、文件写入和运行时 Python 工具注册可以操作本机；现有权限判断不能替代操作系统沙箱。请在隔离环境中使用，不要向不可信用户开放。
+- 复盘会发起额外模型请求；短会话可能不触发，单次命令退出时后台工作也可能尚未完成。提炼规则可能错误，应人工检查并按需删除运行时规则。
+- 本地向量模型需要另行下载并占用内存；缺少模型时语义检索不可用。关键词降级的效果与 FTS5/向量检索不同。
+- `ContextCompressor` 当前只估算 Token，自动压缩已停用。上下文长度和模型输出仍有边界。
+- 网页、QQ、语音、图片、NotebookLM、小红书及 Stitch 依赖外部环境；本轮未登录这些服务。Stitch 返回的离线模板不表示远端生成成功。
+- Docker、launchd、自动学习、圆桌及像素界面保留为可选或实验部分，本轮未做部署和界面验收。`--douyin` 的独立网关实现已移除。
+
+## 来源与许可
+
+代码从 [bmdy5/Xl-General-AI-Agent](https://github.com/bmdy5/Xl-General-AI-Agent) 的 `ec8e1436e9c532dfce7afe92bd23b9286d562bbe` 快照导出，未携带旧 Git 历史；旧归档、个人记忆及本地配置未迁入。代码中保留了参考 Hermes 等项目的说明。
+
+本仓库采用 [MIT License](LICENSE)。外部模型权重与第三方素材的许可由各自来源决定。

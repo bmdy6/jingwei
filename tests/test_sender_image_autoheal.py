@@ -24,21 +24,21 @@ async def test_sender_image_autoheal():
     sender = MessageSender(bot)
     
     # 1. 测试未加 file:/// 的绝对路径 CQ 码
-    faulty_text = "扫码登录小红书 [CQ:image,file=/path/to/user/bot/qrcode_login.png] 请尽快"
+    faulty_text = "扫码登录小红书 [CQ:image,file=/home/test-user/bot/qrcode_login.png] 请尽快"
     await sender.send("private", "10001", "", faulty_text)
     
     # 验证最终发给 OneBot 的 payload 中的 message 已经被自动纠错补全了 file:///
     post_args = bot._http.post.call_args
     assert post_args is not None
     payload = post_args[1]["json"]
-    assert payload["message"] == "扫码登录小红书 [CQ:image,file=file:///path/to/user/bot/qrcode_login.png] 请尽快"
+    assert payload["message"] == "扫码登录小红书 [CQ:image,file=file:///home/test-user/bot/qrcode_login.png] 请尽快"
     
     # 2. 测试已经加了 file:/// 的绝对路径 CQ 码
     bot._http.post.reset_mock()
-    correct_text = "扫码登录小红书 [CQ:image,file=file:///path/to/user/bot/qrcode_login.png]"
+    correct_text = "扫码登录小红书 [CQ:image,file=file:///home/test-user/bot/qrcode_login.png]"
     await sender.send("private", "10001", "", correct_text)
     payload_correct = bot._http.post.call_args[1]["json"]
-    assert payload_correct["message"] == "扫码登录小红书 [CQ:image,file=file:///path/to/user/bot/qrcode_login.png]"
+    assert payload_correct["message"] == "扫码登录小红书 [CQ:image,file=file:///home/test-user/bot/qrcode_login.png]"
 
     # 3. 测试 base64 格式的 CQ 码 (不带绝对路径前缀 /)
     bot._http.post.reset_mock()

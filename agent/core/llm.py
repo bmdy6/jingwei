@@ -83,8 +83,8 @@ class LLMClient:
             
         model_name = model_override or self.model
         if "deepseek" in model_name.lower():
-            kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or ""
-            kwargs["api_base"] = "https://api.deepseek.com/v1"
+            kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or self.api_key or ""
+            kwargs["api_base"] = os.getenv("DEEPSEEK_API_BASE") or self.api_base or "https://api.deepseek.com/v1"
         elif "glm" in model_name.lower():
             kwargs["api_key"] = os.getenv("ZHIPU_API_KEY") or ""
             kwargs["api_base"] = os.getenv("ZHIPU_API_BASE", "https://open.bigmodel.cn/api/paas/v4")
@@ -115,8 +115,8 @@ class LLMClient:
                     else:
                         logging.warning("LLM call failed 2 times, model_pro is not set, sticking to current model.")
                     if "deepseek" in str(kwargs.get("model", "")).lower():
-                        kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or ""
-                        kwargs["api_base"] = "https://api.deepseek.com/v1"
+                        kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or self.api_key or ""
+                        kwargs["api_base"] = os.getenv("DEEPSEEK_API_BASE") or self.api_base or "https://api.deepseek.com/v1"
                 
                 # 物理动态同步环境变量，彻底消灭 LiteLLM 路由期间的 AuthenticationError
                 self._sync_environ_keys(kwargs)
@@ -210,8 +210,8 @@ class LLMClient:
             
         model_name = model_override or self.model
         if "deepseek" in model_name.lower():
-            kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or ""
-            kwargs["api_base"] = "https://api.deepseek.com/v1"
+            kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or self.api_key or ""
+            kwargs["api_base"] = os.getenv("DEEPSEEK_API_BASE") or self.api_base or "https://api.deepseek.com/v1"
         elif "glm" in model_name.lower():
             kwargs["api_key"] = os.getenv("ZHIPU_API_KEY") or ""
             kwargs["api_base"] = os.getenv("ZHIPU_API_BASE", "https://open.bigmodel.cn/api/paas/v4")
@@ -240,8 +240,8 @@ class LLMClient:
                     )
                     kwargs["model"] = self.model_pro
                     if "deepseek" in kwargs["model"].lower():
-                        kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or ""
-                        kwargs["api_base"] = "https://api.deepseek.com/v1"
+                        kwargs["api_key"] = self.deepseek_api_key or os.getenv("DEEPSEEK_API_KEY") or self.api_key or ""
+                        kwargs["api_base"] = os.getenv("DEEPSEEK_API_BASE") or self.api_base or "https://api.deepseek.com/v1"
                 
                 # 物理动态同步环境变量，彻底消灭 LiteLLM 路由期间的 AuthenticationError
                 self._sync_environ_keys(kwargs)

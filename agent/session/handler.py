@@ -30,7 +30,7 @@ class SessionHandler:
         if storage_dir:
             self.storage_dir = Path(storage_dir)
         else:
-            self.storage_dir = Path.home() / ".my-agent" / "sessions"
+            self.storage_dir = Path(os.getenv("MYAGENT_SESSION_DIR", str(Path.home() / ".xl-agent" / "sessions"))).expanduser()
 
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         self.session_file = self.storage_dir / f"{session_id}.jsonl"
@@ -42,11 +42,8 @@ class SessionHandler:
     def _init_db(self):
         """Create FTS5 virtual table if not exists."""
         db = sqlite3.connect(str(self.db_path))
-        db.execute(
-            "CREATE VIRTUAL TABLE IF NOT EXISTS sessions_fts USING fts5("
-            "session_id, role, content, timestamp, tokenize='unicode61'"
-            ")"
-        )
+        from agent.memory.fts_index import create_search_table
+        create_search_table(db, "sessions_fts", ("session_id", "role", "content", "timestamp"))
         db.commit()
         db.close()
 

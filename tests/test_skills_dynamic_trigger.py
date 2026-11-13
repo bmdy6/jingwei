@@ -12,10 +12,12 @@ from agent.core.prompt_builder import (
     rules_lock
 )
 
-@pytest.fixture(scope="module")
-def mock_skills_setup():
+@pytest.fixture
+def mock_skills_setup(tmp_path, monkeypatch):
     """单元测试夹具：动态创建临时测试技能物理目录与资产，测试后自愈清理"""
-    skills_dir = Path(__file__).resolve().parents[1] / "skills"
+    skills_dir = tmp_path / "skills"
+    monkeypatch.setattr("agent.core.prompt_builder.SKILLS_DIR", skills_dir)
+    monkeypatch.setattr("agent.core.prompt_builder._skills_cache", {})
     skills_dir.mkdir(parents=True, exist_ok=True)
     
     # 1. 物理测试技能 A (扁平 Markdown，中度相关技能)
@@ -134,7 +136,8 @@ def test_load_core_skills_smart_threshold(mock_skills_setup):
     """方案 A 补强测试：智能动态阈值挂载策略与并发锁验证"""
     # 1. 强语义激活：匹配高度相关技能 (score >= 5.0)，允许全部挂载突破 Top-2 死限制
     prompt_strong = _load_core_skills("我们需要对网关进行开发并且重构清理日志任务")
-    assert "临时伞状测试技能" in prompt_strong
+    assert "test_temp_umbrella_dir" in prompt_strong
+    assert "SOP 步骤" not in prompt_strong
     
     # 2. 弱语义激活过滤 (score < 2.0)：完全不相关的一个也不加载
     prompt_chat = _load_core_skills("今天天气不错，出去散步")

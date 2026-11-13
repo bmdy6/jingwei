@@ -2,20 +2,20 @@
 """Debug Stitch MCP: raw subprocess test."""
 import asyncio, json, os, subprocess
 
-gcloud = '/path/to/user/.stitch-mcp/google-cloud-sdk/bin/gcloud'
+gcloud = os.getenv("STITCH_GCLOUD_BIN", "gcloud")
 
 async def test():
     min_env = {
         'PATH': f'{os.path.dirname(gcloud)}:/usr/bin:/bin',
         'HOME': os.environ.get('HOME', ''),
         'GOOGLE_CLOUD_PROJECT': '',
-        'CLOUDSDK_CONFIG': '/path/to/user/.stitch-mcp/config',
+        'CLOUDSDK_CONFIG': os.getenv("STITCH_CLOUDSDK_CONFIG", os.path.expanduser("~/.stitch-mcp/config")),
     }
 
     r = subprocess.run([gcloud, 'auth', 'application-default', 'print-access-token'],
         capture_output=True, text=True, timeout=10, env=min_env)
     token = r.stdout.strip()
-    print(f'TOKEN: {token[:15]}...')
+    print('TOKEN: loaded (redacted)')
     env['STITCH_ACCESS_TOKEN'] = token
 
     mcp_env = {**min_env, 'STITCH_ACCESS_TOKEN': token}

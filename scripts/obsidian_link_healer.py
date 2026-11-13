@@ -1,3 +1,4 @@
+from pathlib import Path
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -17,7 +18,7 @@ import zipfile
 from datetime import datetime
 
 # 物理沙箱锁定
-NOTES_DIR = "/path/to/user/Desktop/学习笔记"
+NOTES_DIR = os.getenv("MYAGENT_NOTES_DIR", str(Path.home() / ".xl-agent" / "notes"))
 ARCHIVE_DIR = os.path.join(NOTES_DIR, ".archive")
 ATTACHMENTS_DIR = os.path.join(NOTES_DIR, ".attachments")
 
@@ -253,7 +254,7 @@ def build_cold_backup():
         return False
         
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_filename = f"/path/to/user/Desktop/学习笔记_bak_{timestamp}"
+    backup_filename = str(Path(NOTES_DIR).with_name(Path(NOTES_DIR).name + f"_bak_{timestamp}"))
     
     print(f"📦 [灾备启动] 正在为亮哥的知识资产打包物理快照...")
     try:

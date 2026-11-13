@@ -25,8 +25,8 @@ class StdioTransport(MCPTransport):
     async def start(self):
         import shlex
         cmd_str = " ".join(shlex.quote(x) for x in self.cmd)
-        self.proc = await asyncio.create_subprocess_shell(
-            cmd_str,
+        self.proc = await asyncio.create_subprocess_exec(
+            *self.cmd,
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
@@ -40,8 +40,17 @@ class StdioTransport(MCPTransport):
         self.proc.stdin.write(payload.encode())
         await self.proc.stdin.drain()
         
-        line = await asyncio.wait_for(self.proc.stdout.readline(), timeout=30)
-        return json.loads(line.decode().strip())
+        if "id" not in request:
+            return {}
+        async def read_response():
+            while True:
+                line = await self.proc.stdout.readline()
+                if not line:
+                    raise RuntimeError("MCP server closed stdout before responding")
+                response = json.loads(line.decode())
+                if response.get("id") == request["id"]:
+                    return response
+        return await asyncio.wait_for(read_response(), timeout=30)
 
     async def close(self):
         if self.proc:
@@ -74,7 +83,7 @@ class StreamableHTTPTransport(MCPTransport):
                 if extracted_id:
                     self.session_id = extracted_id
                     
-            return resp.json()
+            return {} if "id" not in request else resp.json()
 
     async def close(self):
         pass

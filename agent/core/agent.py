@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Agent 核心外观 Facade 类.
 
 所有的复杂逻辑已被物理拆分到 prompt_builder.py, history_repair.py, react_loop.py.
@@ -76,7 +78,7 @@ class Agent:
             if template_file.exists():
                 default_profile = _json.loads(template_file.read_text(encoding="utf-8"))
             else:
-                default_profile = {"name": "小萤", "gender": "女", "user_address": "亮哥",
+                default_profile = {"name": "XL", "gender": "", "user_address": "用户",
                                    "tone_style": "", "preferences": [], "avoid_list": []}
             try:
                 profile_file.write_text(_json.dumps(default_profile, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -85,7 +87,7 @@ class Agent:
         try:
             self._persona_cache = _json.loads(profile_file.read_text(encoding="utf-8"))
         except Exception:
-            self._persona_cache = {"name": "小萤", "gender": "女", "user_address": "亮哥",
+            self._persona_cache = {"name": "XL", "gender": "", "user_address": "用户",
                                    "tone_style": "", "preferences": [], "avoid_list": []}
 
         self.compressor = ContextCompressor(llm=llm, max_tokens=80000)

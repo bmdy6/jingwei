@@ -323,10 +323,7 @@ async def test_gateway_admin_penetration_and_recovery(monkeypatch):
 @pytest.mark.asyncio
 async def test_gateway_real_qq_connectivity(monkeypatch):
     """用例 6: 真实环境下的 OneBot 接口与 7 大核心功能物理双向拨测"""
-    # 真实 QQ 双向拨测测试，仅在 live 物理连通状态下由人工激活，CI 离线环境一律静默跳过
-    import logging
-    logging.getLogger("test").warning("Skipping real QQ connectivity e2e test in automated pipeline safely.")
-    return
+    pytest.skip("Requires a logged-in NapCat account, QQ message delivery, live LLM and GPT-SoVITS; excluded from offline CI")
     monkeypatch.setenv("ADMIN_ID", "10001")
     
     import urllib.request

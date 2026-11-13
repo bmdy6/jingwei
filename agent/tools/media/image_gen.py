@@ -17,7 +17,7 @@ from ..base_tool import BaseTool, ToolResult
 
 logger = logging.getLogger(__name__)
 
-IMAGE2_BASE = os.getenv("IMAGE2_BASE", "https://images.example.com")
+IMAGE2_BASE = os.getenv("IMAGE2_BASE", "")
 IMAGE2_USER = os.getenv("IMAGE2_USER", "")
 IMAGE2_PASS = os.getenv("IMAGE2_PASS", "")
 

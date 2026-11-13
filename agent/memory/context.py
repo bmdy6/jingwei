@@ -164,7 +164,15 @@ def search_memories(manager, query: str, limit: int = 5) -> list[dict]:
             """, (fts_query, limit + limit))
             ki_fts_rows = cur.fetchall()
         except Exception as e:
-            logger.warning(f"KI FTS search failed: {e}")
+            logger.warning(f"KI FTS search unavailable, using keyword matching: {e}")
+            terms = _cjk_space(clean).split()
+            if terms:
+                clauses = " OR ".join("content LIKE ? OR title LIKE ? OR keywords LIKE ?" for _ in terms[:20])
+                params = [f"%{term}%" for term in terms[:20] for _ in range(3)]
+                ki_fts_rows = db.execute(
+                    f"SELECT ki_id, title, category, keywords, summary, content FROM kis_fts WHERE {clauses} LIMIT ?",
+                    params + [limit + limit],
+                ).fetchall()
             
         legacy_rows = []
         try:

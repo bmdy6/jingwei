@@ -12,13 +12,23 @@ def _cjk_space(text: str) -> str:
         return ""
     return _CJK_RE.sub(r' \1 ', text)
 
+def create_search_table(conn, name: str, columns: tuple[str, ...], tokenizer="unicode61"):
+    """Use an ordinary SQLite table when the build has no FTS5 module."""
+    # All identifiers come from static application code, never tool/user input.
+    fields = ", ".join(columns)
+    try:
+        conn.execute(f"CREATE VIRTUAL TABLE IF NOT EXISTS {name} USING fts5({fields}, tokenize='{tokenizer}')")
+    except sqlite3.OperationalError as exc:
+        if "no such module: fts5" not in str(exc).lower():
+            raise
+        schema = ", ".join(f"{column} TEXT" for column in columns)
+        conn.execute(f"CREATE TABLE IF NOT EXISTS {name} ({schema})")
+
+
 def create_table(conn: sqlite3.Connection):
-    """创建 FTS5 全文搜索表."""
-    conn.execute("""
-        CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts
-        USING fts5(content, description, memory_type, filename, timestamp,
-                   tokenize="porter unicode61")
-    """)
+    create_search_table(conn, "memories_fts",
+                        ("content", "description", "memory_type", "filename", "timestamp"),
+                        "porter unicode61")
 
 def populate(conn: sqlite3.Connection, rows: list[dict]):
     """批量插入记忆."""
