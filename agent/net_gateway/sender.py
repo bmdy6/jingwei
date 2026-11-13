@@ -61,9 +61,9 @@ class MessageSender:
                 from agent.tools.visual_tools import send_qq_notification
                 
                 start_msg = (
-                    f"🌸 **[小萤自愈启动]**\n"
+                    f"🌸 **[精卫自愈启动]**\n"
                     f"亮哥，检测到常规 DOM 方式回复粉丝【{nickname}】失败。\n"
-                    f"小萤正在激活 Mimo 视觉引擎，直连 CDP 操作浏览器进行物理自愈补发..."
+                    f"精卫正在激活 Mimo 视觉引擎，直连 CDP 操作浏览器进行物理自愈补发..."
                 )
                 await send_qq_notification(start_msg)
                 
@@ -79,8 +79,8 @@ class MessageSender:
                 
                 if res.get("success"):
                     success_msg = (
-                        f"🌸 **[小萤专属自愈播报]**\n"
-                        f"亮哥！刚才常规 DOM 发送私信失败了，小萤已自动启动 Mimo 视觉引擎，直连 CDP 操作浏览器，成功帮亮哥把消息补发出去啦！✨\n\n"
+                        f"🌸 **[精卫专属自愈播报]**\n"
+                        f"亮哥！刚才常规 DOM 发送私信失败了，精卫已自动启动 Mimo 视觉引擎，直连 CDP 操作浏览器，成功帮亮哥把消息补发出去啦！✨\n\n"
                         f"收信粉丝: {nickname}\n"
                         f"补发内容: {text}"
                     )
@@ -89,8 +89,8 @@ class MessageSender:
                 else:
                     err = res.get("error", "未知原因")
                     fail_msg = (
-                        f"⚠️ **[小萤自愈失败]**\n"
-                        f"抱歉亮哥，小萤尝试了 Mimo 视觉自愈补发给【{nickname}】但也失败了。\n"
+                        f"⚠️ **[精卫自愈失败]**\n"
+                        f"抱歉亮哥，精卫尝试了 Mimo 视觉自愈补发给【{nickname}】但也失败了。\n"
                         f"失败原因: {err}\n"
                         f"待发送内容: {text}"
                     )
@@ -100,7 +100,7 @@ class MessageSender:
                 logger.error(f"Error executing visual healing: {ex}", exc_info=True)
                 try:
                     from agent.tools.visual_tools import send_qq_notification
-                    await send_qq_notification(f"⚠️ **[小萤自愈异常]**\n自愈引擎执行时抛出异常: {ex}")
+                    await send_qq_notification(f"⚠️ **[精卫自愈异常]**\n自愈引擎执行时抛出异常: {ex}")
                 except Exception:
                     pass
                     
@@ -190,7 +190,7 @@ class MessageSender:
             logger.info(f"Agent → QQ [{user_id or group_id}]: {text[:80]}")
             # 物理写入活动轨迹日志以实现输入与输出时间线完全融合
             session_key = f"group_{group_id}" if msg_type == "group" else f"user_{user_id}"
-            self.bot._log_activity("Agent回复", f"小萤 ({session_key}): {text}", user_id=user_id)
+            self.bot._log_activity("Agent回复", f"精卫 ({session_key}): {text}", user_id=user_id)
         except Exception as e:
             logger.error(f"Send error: {e}")
 

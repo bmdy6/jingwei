@@ -17,9 +17,9 @@
         <false/>
     </dict>
     <key>StandardOutPath</key>
-    <string>__HOME__/.xl-agent/qq_agent.log</string>
+    <string>__PROJECT_ROOT__/logs/qq_agent.log</string>
     <key>StandardErrorPath</key>
-    <string>__HOME__/.xl-agent/qq_agent.err</string>
+    <string>__PROJECT_ROOT__/logs/qq_agent.err</string>
     <key>WorkingDirectory</key>
     <string>__PROJECT_ROOT__</string>
 </dict>

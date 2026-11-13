@@ -195,7 +195,7 @@ class Image2GenerateTool(BaseTool):
         filepath = ASSETS_DIR / filename
         try:
             encoded_url = urllib.parse.quote(url, safe=":/?=&%")
-            req = urllib.request.Request(encoded_url, headers={"User-Agent": "XL-Agent/1.0"})
+            req = urllib.request.Request(encoded_url, headers={"User-Agent": "Jingwei/1.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
                 filepath.write_bytes(resp.read())
             return filename

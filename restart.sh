@@ -1,12 +1,12 @@
 #!/bin/bash
-# XL Agent - 强力自愈重启中枢 (restart.sh)
+# Jingwei - 强力自愈重启中枢 (restart.sh)
 # 职责: 一键强杀残留进程并干净后台启动 QQ Gateway 大脑
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJECT_DIR"
 
 echo "=========================================="
-echo "  🌸 小萤大脑 QQ Gateway 自愈重启中枢"
+echo "  🌸 精卫大脑 QQ Gateway 自愈重启中枢"
 echo "  $(date)"
 echo "=========================================="
 

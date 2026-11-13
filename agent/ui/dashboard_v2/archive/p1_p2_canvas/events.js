@@ -6,7 +6,7 @@ const T = TILE * SCALE;
 
 // ── Agent 定义 ────────────────────────────────────────
 const AGENT_DEFS = {
-  'xl':        { name: 'XL Agent',   role: 'DIRECTOR',  color: '#f4d058', cape: '#e04b4b', room: 'xl',       mem: 42, hp: 90 },
+  'xl':        { name: 'Jingwei',   role: 'DIRECTOR',  color: '#f4d058', cape: '#e04b4b', room: 'xl',       mem: 42, hp: 90 },
   'learner-1': { name: 'Learner-01', role: 'RESEARCH',  color: '#4ba4e0', cape: null,       room: 'computer', mem: 12, hp: 65 },
   'debater-a': { name: 'Aggressive', role: 'DEBATE',    color: '#e04b4b', cape: null,       room: 'meeting',  mem: 8,  hp: 80 },
   'debater-b': { name: 'Conservative',role: 'DEBATE',   color: '#4be05a', cape: null,       room: 'meeting',  mem: 8,  hp: 75 },
@@ -52,7 +52,7 @@ function drawAgent(ctx, a) {
   ctx.ellipse(x + 8, y + 30, 9, 4, 0, 0, Math.PI*2);
   ctx.fill();
 
-  // 披风（仅 XL）
+  // 披风（仅精卫）
   if (a.cape) {
     ctx.fillStyle = a.cape;
     ctx.fillRect(x + 3, y + 10 + bobY, 10, 14);

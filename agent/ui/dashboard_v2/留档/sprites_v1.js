@@ -212,7 +212,7 @@ const FURNITURE_LAYOUT = () => {
     { type: 'chair', x: R.library.x + T*0.5,   y: R.library.y + T*3.5   },
     { type: 'chair', x: R.library.x + T*2.0,   y: R.library.y + T*3.5   },
 
-    // XL 办公室: 大桌 + 书架
+    // 精卫办公室: 大桌 + 书架
     { type: 'desk',  x: R.xl.x + T*1.0,        y: R.xl.y + T*1.0        },
     { type: 'chair', x: R.xl.x + T*1.2,        y: R.xl.y + T*2.0        },
     { type: 'shelf', x: R.xl.x + T*3.2,        y: R.xl.y + T*0.2        },

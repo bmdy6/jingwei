@@ -68,26 +68,15 @@ async def run_interactive():
     except Exception:
         pass
 
-    print(fr"""
-  ╔══════════════════════════════════════════════════════╗
-  ║                                                      ║
-  ║   ██╗  ██╗██╗      █████╗  ██████╗ ███████╗███╗  ██╗████████╗ ║
-  ║   ╚██╗██╔╝██║     ██╔══██╗██╔════╝ ██╔════╝████╗ ██║╚══██╔══╝ ║
-  ║    ╚███╔╝ ██║     ███████║██║  ███╗█████╗  ██╔██╗██║   ██║    ║
-  ║    ██╔██╗ ██║     ██╔══██║██║   ██║██╔══╝  ██║╚████║   ██║    ║
-  ║   ██╔╝╚██╗███████╗██║  ██║╚██████╔╝███████╗██║ ╚███║   ██║    ║
-  ║   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚══╝   ╚═╝    ║
-  ║                                                      ║
-  ║           Personal AI · Self-Evolving · v2            ║
-  ╠══════════════════════════════════════════════════════╣
-  ║  Model   : {model_short:<43}║
-  ║  Tools   : {tools_list:<43}║
-  ║  History : {len(agent.messages)} messages{' ':<34}║
-  ╠══════════════════════════════════════════════════════╣
-  ║  /exit   /clear   /memory   /tools   /mode          ║
-  ╚══════════════════════════════════════════════════════╝
+    print(f"""
+  精卫 / Jingwei
+  Personal AI · Self-Evolving
+  Model: {model_short}
+  Tools: {tools_list}
+  History: {len(agent.messages)} messages
+  /exit   /clear   /memory   /tools   /mode
 
-  {_ua}，我是你的小弟 XL，有什么吩咐？
+  {_ua}，我是精卫，有什么吩咐？
 """)
 
     history_loaded = False

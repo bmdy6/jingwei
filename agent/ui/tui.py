@@ -1,4 +1,4 @@
-"""XL TUI — 干净、简约的对话界面."""
+"""Jingwei TUI — 干净、简约的对话界面."""
 
 import time
 import sys
@@ -16,7 +16,7 @@ C_DIM = "grey58"
 C_HEAD = "blue"
 
 
-def h(title: str = "XL Agent", subtitle: str = "") -> str:
+def h(title: str = "Jingwei", subtitle: str = "") -> str:
     out = f"[bold]{title}[/bold]"
     if subtitle:
         out += f"  [dim]{subtitle}[/dim]"

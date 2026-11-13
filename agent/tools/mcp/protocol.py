@@ -101,7 +101,7 @@ class MCPClient:
             "params": {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {},
-                "clientInfo": {"name": "xl-agent", "version": "2.0.0"},
+                "clientInfo": {"name": "jingwei", "version": "2.0.0"},
             },
         }
         resp = await self.transport.send(init_payload)

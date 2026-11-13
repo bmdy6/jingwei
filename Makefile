@@ -1,4 +1,4 @@
-# XL Agent — Makefile (v3.0)
+# Jingwei — Makefile (v3.0)
 # 用法: make setup | up | build | logs | qrcode | update
 
 .PHONY: setup up build logs qrcode update clean gateway-restart
@@ -13,9 +13,9 @@ setup:
 	chmod -R 777 napcat_data agent_mem
 	@if [ ! -f .env ]; then \
 		echo "⚠️  未找到 .env，生成模板..."; \
-		echo 'MYAGENT_MODEL=openai/gpt-4o' > .env; \
-		echo 'MYAGENT_API_KEY=your-api-key' >> .env; \
-		echo 'MYAGENT_API_BASE=' >> .env; \
+		echo 'JINGWEI_MODEL=openai/gpt-4o' > .env; \
+		echo 'JINGWEI_API_KEY=your-api-key' >> .env; \
+		echo 'JINGWEI_API_BASE=' >> .env; \
 		echo "✅ .env 模板已生成，请编辑填入真实 Key"; \
 	else \
 		echo "✅ .env 已存在"; \
@@ -47,7 +47,7 @@ endif
 
 # ── 查看 Agent 日志 ──
 logs:
-	docker compose logs -f --tail=50 xl-agent
+	docker compose logs -f --tail=50 jingwei
 
 # ── 提取扫码二维码 ──
 qrcode:

@@ -83,7 +83,7 @@ class QQGateway:
                 return await send_voice(self.context, msg_type, user_id, group_id, text, style, is_test)
         self.context.send_voice_handler = custom_send_voice
 
-        logger.info(f"MyAgent — QQ Gateway")
+        logger.info(f"Jingwei — QQ Gateway")
         logger.info(f"WebSocket: {NC_WS_URL}")
         logger.info(f"HTTP API:  {NC_HTTP_URL}")
 
@@ -186,7 +186,7 @@ class QQGateway:
             
             inject_js = f"""
 <div id="xl-stitch-control-bar" style="position: fixed; top: 16px; right: 16px; z-index: 999999; display: inline-flex; align-items: center; gap: 12px; padding: 10px 18px; border-radius: 12px; background: rgba(26, 26, 26, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; transition: all 0.3s ease;">
-    <span style="color: #00ffcc; font-size: 13px; font-weight: 600; text-shadow: 0 0 8px rgba(0,255,204,0.3);">⚡ XL Stitch 预览中</span>
+    <span style="color: #00ffcc; font-size: 13px; font-weight: 600; text-shadow: 0 0 8px rgba(0,255,204,0.3);">⚡ Jingwei Stitch 预览中</span>
     <a href="{download_url}" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #00ffcc; color: #000000; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 700; transition: transform 0.2s ease, background 0.2s ease; cursor: pointer;" onmouseover="this.style.background='#00ddaa'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='#00ffcc'; this.style.transform='scale(1)';">
         📥 手机下载
     </a>
@@ -427,14 +427,14 @@ class QQGateway:
         """从资源文件加载画像属性，支持被 dispatcher 调用或在测试中被 mock."""
         import json
         from pathlib import Path
-        _persona_name = "小萤"
+        _persona_name = "精卫"
         _user_address = "亮哥"
         try:
             root_dir = Path(__file__).resolve().parents[2]
             pf = root_dir / "agent" / "resources" / "persona_profile.json"
             if pf.exists():
                 prof = json.loads(pf.read_text(encoding="utf-8"))
-                _persona_name = prof.get("name", "小萤")
+                _persona_name = prof.get("name", "精卫")
                 _user_address = prof.get("user_address", "亮哥")
         except Exception:
             pass
@@ -445,14 +445,14 @@ class QQGateway:
         try:
             return await self.dispatcher._generate_private_fatigue_announcement(user_id)
         except AttributeError:
-            return "小萤累了，去打盹半小时。"
+            return "精卫累了，去打盹半小时。"
 
     async def _generate_fatigue_announcement(self, group_id: str) -> str:
         """物理打盹宣告，优先委派给 dispatcher。"""
         try:
             return await self.dispatcher._generate_fatigue_announcement(group_id)
         except AttributeError:
-            return "唔……小萤用脑过度，去打盹半小时。"
+            return "唔……精卫用脑过度，去打盹半小时。"
 
     @property
     def _pending_perms(self) -> dict:

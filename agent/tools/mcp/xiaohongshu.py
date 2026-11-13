@@ -313,7 +313,7 @@ class XiaohongshuTool(BaseTool):
                 "params": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {},
-                    "clientInfo": {"name": "xl-agent", "version": "1.0.0"},
+                    "clientInfo": {"name": "jingwei", "version": "1.0.0"},
                 },
             }
             init_resp = await client.post(SERVER_URL, json=init_payload)

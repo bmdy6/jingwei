@@ -13,12 +13,9 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 from agent.core.config import settings
+from agent.memory.store import get_kb_dir
 kb_cfg = settings.get("knowledge_base") or {}
-kb_dir_cfg = kb_cfg.get("kb_dir")
-if kb_dir_cfg:
-    KNOWLEDGE_BASE = Path(os.path.expanduser(kb_dir_cfg))
-else:
-    KNOWLEDGE_BASE = Path(os.getenv("MYAGENT_KB_DIR", str(Path.home() / "Documents" / "个人博客" / "学习笔记" / "agent自主学习的东西")))
+KNOWLEDGE_BASE = Path(get_kb_dir())
 
 # 清理审查 prompt
 CLEANUP_PROMPT = """你是一个知识库管理员。请审查以下知识文件，决定是否保留。

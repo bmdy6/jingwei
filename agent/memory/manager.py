@@ -7,7 +7,8 @@
 - context.py
 - session.py
 """
-
+from agent.core.environment import env_get
+from agent.core.paths import runtime_path
 import logging
 import asyncio
 import os
@@ -126,8 +127,8 @@ class MemoryManager:
         sec_cfg = settings.get("security") or {}
         admin_id = os.getenv("QQ_ADMIN_ID", sec_cfg.get("admin_id", ""))
         
-        # 2. 定位基础物理路径 (默认 "~/.my-agent/memory")
-        base_dir_str = os.getenv("MYAGENT_MEMORY_DIR") or memory_cfg.get("base_dir", "~/.xl-agent/memory")
+        # 2. 定位基础物理路径 (默认 "~/.jingwei/memory")
+        base_dir_str = env_get("JINGWEI_MEMORY_DIR") or memory_cfg.get("base_dir") or str(runtime_path("JINGWEI_MEMORY_DIR", "memory"))
         
         if base_dir:
             self.base_dir = Path(base_dir)
@@ -155,7 +156,7 @@ class MemoryManager:
                 for src_path in self.backup_dir.iterdir():
                     if src_path.is_file():
                         shutil.copy2(src_path, self.base_dir / src_path.name)
-                logger.info(f"✨ [自愈还原] 成功从项目沙箱备份 ({self.backup_dir.name}) 中一键还原了小萤的所有记忆资产！")
+                logger.info(f"✨ [自愈还原] 成功从项目沙箱备份 ({self.backup_dir.name}) 中一键还原了精卫的所有记忆资产！")
             except Exception as restore_err:
                 logger.error(f"Failed to reverse restore memory backup: {restore_err}")
 

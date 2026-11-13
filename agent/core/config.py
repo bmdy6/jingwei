@@ -2,35 +2,41 @@ import os
 import logging
 from dotenv import load_dotenv
 from pathlib import Path
+from .environment import aliases, env_get, normalize
 
 logger = logging.getLogger("agent.config")
 
+
 class Settings:
-    def __init__(self):
+    def __init__(self, root=None):
+        self.root = Path(root) if root is not None else Path(__file__).resolve().parents[2]
         self._data = {}
         self.load()
 
+    @staticmethod
+    def _inject(values):
+        for key, val in normalize(values).items():
+            if val is not None and not isinstance(val, (dict, list)):
+                os.environ.setdefault(key, str(val).lower() if isinstance(val, bool) else str(val))
+
     def load(self):
-        """自适应从 config/settings.yaml 加载配置并注入环境变量"""
+        """Process > .env > YAML; JINGWEI names win within each source."""
         try:
-            load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
-            # 找到项目根目录下的 config/settings.yaml
-            root = Path(__file__).resolve().parents[2]
-            yaml_path = root / "config" / "settings.yaml"
-            
+            # Normalize each layer before injecting the next. An old process key
+            # must still beat a new .env/YAML key, including explicitly empty values.
+            self._inject(dict(os.environ))
+            # Keep round 1 interpolation semantics: process values win inside ${...}.
+            load_dotenv(self.root / ".env", override=False)
+            self._inject(dict(os.environ))
+            yaml_path = self.root / "config" / "settings.yaml"
             if not yaml_path.exists():
-                yaml_path = root / "config.yaml"
-            
+                yaml_path = self.root / "config.yaml"
             if yaml_path.exists():
                 import yaml
-                content = yaml_path.read_text(encoding="utf-8")
-                parsed = yaml.safe_load(content)
+                parsed = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
                 if isinstance(parsed, dict):
-                    self._data = parsed
-                    # 自动注入到 os.environ，实现 100 percent 向后兼容
-                    for key, val in parsed.items():
-                        if val is not None and not isinstance(val, (dict, list)):
-                            os.environ.setdefault(str(key), str(val).lower() if isinstance(val, bool) else str(val))
+                    self._data = normalize(parsed)
+                    self._inject(self._data)
                 logger.info(f"Successfully loaded config from {yaml_path}")
             else:
                 logger.warning("Centralized config file settings.yaml not found, falling back to env.")
@@ -41,9 +47,10 @@ class Settings:
         return self.get(name, "")
 
     def get(self, name: str, default=None):
-        if name in os.environ:
-            return os.environ[name]
-        return self._data.get(name, default)
+        value = env_get(name)
+        if value is not None:
+            return value
+        return self._data.get(aliases(name)[0], default)
 
     def enabled(self, name: str) -> bool:
         return str(self.get(name, False)).strip().lower() in {"1", "true", "yes", "on"}
@@ -55,5 +62,5 @@ class Settings:
             return thresholds.get(key, default)
         return default
 
-# 单例模式暴露
+
 settings = Settings()

@@ -30,7 +30,8 @@ class SessionHandler:
         if storage_dir:
             self.storage_dir = Path(storage_dir)
         else:
-            self.storage_dir = Path(os.getenv("MYAGENT_SESSION_DIR", str(Path.home() / ".xl-agent" / "sessions"))).expanduser()
+            from agent.core.paths import runtime_path
+            self.storage_dir = runtime_path("JINGWEI_SESSION_DIR", "sessions")
 
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         self.session_file = self.storage_dir / f"{session_id}.jsonl"

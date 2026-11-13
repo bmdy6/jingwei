@@ -1,5 +1,5 @@
 #!/bin/bash
-# MyAgent - 手动启动 Auto Learn 自主学习脚本
+# Jingwei - 手动启动 Auto Learn 自主学习脚本
 # 职责: 干净、安全地启动自主学习服务。兼容 launchd 系统级托管与 nohup 后台降级。
 
 set -e

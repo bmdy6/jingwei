@@ -1,8 +1,5 @@
 #!/bin/sh
+# Legacy alias; remove in a future release.
 set -eu
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-cd "$project_dir"
-if [ -x "$project_dir/.venv/bin/python" ]; then
-    exec "$project_dir/.venv/bin/python" "$project_dir/main.py" "$@"
-fi
-exec python3 "$project_dir/main.py" "$@"
+exec "$project_dir/jingwei" "$@"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# MyAgent - 手动启动 QQ Gateway 脚本
+# Jingwei - 手动启动 QQ Gateway 脚本
 # 职责: 干净、安全地拉起 QQ 网关服务。兼容 launchd 系统级托管与 nohup 后台降级。
 
 set -e

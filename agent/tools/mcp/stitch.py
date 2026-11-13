@@ -213,7 +213,7 @@ class StitchTool(BaseTool):
             css = screen_data.get("cssContent", "")
             if html:
                 full_html = f"<style>{css}</style>\n{html}"
-                # 自动保存落盘到指定项目根目录下，解决小萤异步丢失问题
+                # 自动保存落盘到指定项目根目录下，解决精卫异步丢失问题
                 target_dest = dest_path or str(runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs") / "stitch_latest.html")
                 try:
                     Path(target_dest).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
@@ -269,7 +269,7 @@ class StitchTool(BaseTool):
             if not proj_list:
                 create_req = __import__("urllib.request").request.Request(
                     f"{base_url}/projects",
-                    data=json.dumps({"title": "xl-generated-ui",
+                    data=json.dumps({"title": "jingwei-generated-ui",
                         "projectType": "TEXT_TO_UI_PRO"}).encode(), headers=headers)
                 create_resp = await loop.run_in_executor(None,
                     lambda: __import__("urllib.request").request.urlopen(create_req, timeout=10))

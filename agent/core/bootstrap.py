@@ -1,3 +1,4 @@
+from agent.core.environment import env_get
 import os
 import sys
 import logging
@@ -5,14 +6,6 @@ import warnings
 from .config import settings
 
 logger = logging.getLogger("agent.bootstrap")
-
-def _load_dotenv():
-    """从项目根目录 .env 文件加载环境变量（若存在）。"""
-    from pathlib import Path
-    env_file = Path(__file__).resolve().parents[2] / ".env"
-    if env_file.exists():
-        from dotenv import load_dotenv
-        load_dotenv(env_file, override=False)
 
 from contextvars import ContextVar
 from logging.handlers import RotatingFileHandler
@@ -29,15 +22,16 @@ class ContextFormatter(logging.Formatter):
         return super().format(record)
 
 def setup_system():
-    """初始化系统环境：加载 .env、警告过滤与双通道日志"""
-    _load_dotenv()
+    """初始化系统环境：旧目录提示、警告过滤与双通道日志"""
+    from .paths import warn_legacy_data_dir
+    warn_legacy_data_dir()
 
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
     for h in root_logger.handlers[:]:
         root_logger.removeHandler(h)
 
-    formatter = ContextFormatter('%(asctime)s - %(session)s - %(levelname)s - %(name)s - %(message)s')
+    formatter = ContextFormatter('[Jingwei] %(asctime)s - %(session)s - %(levelname)s - %(name)s - %(message)s')
 
     os.makedirs("logs", exist_ok=True)
 
@@ -117,14 +111,14 @@ def build_agent(session_id: str = "default"):
     
     from agent.tools.registry import registry
 
-    model_vision = os.environ.get("MYAGENT_MODEL", "openai/gpt-4o")
-    api_key = os.environ.get("MYAGENT_API_KEY") or os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
-    api_base = os.environ.get("MYAGENT_API_BASE") or os.environ.get("OPENAI_API_BASE")
+    model_vision = env_get("JINGWEI_MODEL", "openai/gpt-4o")
+    api_key = env_get("JINGWEI_API_KEY") or os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+    api_base = env_get("JINGWEI_API_BASE") or os.environ.get("OPENAI_API_BASE")
 
-    model_flash = os.environ.get("MYAGENT_MODEL_FLASH") or model_vision
-    model_pro = os.environ.get("MYAGENT_MODEL_PRO") or model_flash
+    model_flash = env_get("JINGWEI_MODEL_FLASH") or model_vision
+    model_pro = env_get("JINGWEI_MODEL_PRO") or model_flash
 
-    max_tokens = int(os.environ.get("MYAGENT_MAX_TOKENS", "8192"))
+    max_tokens = int(env_get("JINGWEI_MAX_TOKENS", "8192"))
     llm = LLMClient(
         model=model_flash,
         api_key=api_key,
@@ -172,7 +166,7 @@ def build_agent(session_id: str = "default"):
         registry=registry,
         memory=memory,
         session=session,
-        max_turns=int(os.environ.get("MYAGENT_MAX_TURNS", "20"))
+        max_turns=int(env_get("JINGWEI_MAX_TURNS", "20"))
     )
 
     agent_instance.session_key = session_id  # 显式绑定，用于短期记忆持久化与自愈定位

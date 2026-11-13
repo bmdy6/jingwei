@@ -76,7 +76,7 @@ class SendImageToQqTool(BaseTool):
     ) -> AsyncGenerator[ToolResult, None]:
         local_path = input_args.get("local_path")
         cos_key_suffix = input_args.get("cos_key_suffix") or "common/image.png"
-        message_prefix = input_args.get("message_prefix") or "小萤为你推送图片："
+        message_prefix = input_args.get("message_prefix") or "精卫为你推送图片："
 
         yield ToolResult(type="progress", data="开始上传图片到腾讯云 COS...")
 

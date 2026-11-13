@@ -78,7 +78,7 @@ class Agent:
             if template_file.exists():
                 default_profile = _json.loads(template_file.read_text(encoding="utf-8"))
             else:
-                default_profile = {"name": "XL", "gender": "", "user_address": "用户",
+                default_profile = {"name": "精卫", "gender": "", "user_address": "用户",
                                    "tone_style": "", "preferences": [], "avoid_list": []}
             try:
                 profile_file.write_text(_json.dumps(default_profile, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -87,7 +87,7 @@ class Agent:
         try:
             self._persona_cache = _json.loads(profile_file.read_text(encoding="utf-8"))
         except Exception:
-            self._persona_cache = {"name": "XL", "gender": "", "user_address": "用户",
+            self._persona_cache = {"name": "精卫", "gender": "", "user_address": "用户",
                                    "tone_style": "", "preferences": [], "avoid_list": []}
 
         self.compressor = ContextCompressor(llm=llm, max_tokens=80000)

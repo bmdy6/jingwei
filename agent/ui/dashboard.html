@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head><meta charset="UTF-8"><title>XL Agent — Pixel Office</title>
+<head><meta charset="UTF-8"><title>Jingwei — Pixel Office</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1c2c;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden}
@@ -37,7 +37,7 @@ const P = {
 const ROOMS = {
   computer:  {x:10,  y:10,  w:230, h:200, name:'电脑房',    color:'#1a2a3a'},
   library:   {x:250, y:10,  w:230, h:200, name:'图书室',    color:'#2a1a1a'},
-  xlOffice:  {x:490, y:10,  w:230, h:200, name:'XL办公室',  color:'#2a2a1a'},
+  xlOffice:  {x:490, y:10,  w:230, h:200, name:'精卫办公室',  color:'#2a2a1a'},
   storage:   {x:730, y:10,  w:220, h:200, name:'杂物室',    color:'#1a2a2a'},
   corridor:  {x:10,  y:220, w:940, h:80,  name:'走廊',      color:'#2a2a3a'},
   meeting:   {x:10,  y:310, w:940, h:280, name:'会议室',     color:'#2a1a2a'},
@@ -207,7 +207,7 @@ function render(ts) {
   // Meeting seats
   MEETING_SEATS.forEach(s => rect(s.x-5, s.y-5, 10, 10, P.furniture));
 
-  // XL monitors
+  // Jingwei monitors
   rect(560, 30, 15, 12, P.screenOff);
   rect(580, 30, 15, 12, P.screenOn);
   rect(600, 30, 15, 12, P.screenOff);
@@ -320,7 +320,7 @@ function moveToRoom(a, roomKey) {
 }
 
 // ── Boot ─────────────────────────────────
-spawnAgent('xl', 'XL', P.xlGold, 'xlOffice');
+spawnAgent('xl', 'Jingwei', P.xlGold, 'xlOffice');
 connectSSE();
 requestAnimationFrame(render);
 </script>

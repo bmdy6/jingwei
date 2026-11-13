@@ -77,7 +77,7 @@ async def test_gateway_base_response_and_rag(monkeypatch):
     event = {
         "message_type": "private",
         "user_id": "10001",
-        "raw_message": "你好小萤",
+        "raw_message": "你好精卫",
         "self_id": "999999",
         "sender": {"nickname": "亮哥"}
     }
@@ -364,7 +364,7 @@ async def test_gateway_real_qq_connectivity(monkeypatch):
     
     # 注入暗号用于物理 RAG 检索校验
     mem = MemoryManager()
-    await mem.save("user_profile.md", "亮哥的暗号", "亮哥的特制暗号是：小萤是宇宙超级美少女")
+    await mem.save("user_profile.md", "亮哥的暗号", "亮哥的特制暗号是：精卫是宇宙超级美少女")
     
     # 临时将测试用户 10002 加入安全白名单
     monkeypatch.setenv("MY_AGENT_WHITE_LIST", "10002")
@@ -419,7 +419,7 @@ async def test_gateway_real_qq_connectivity(monkeypatch):
         rag_event = {
             "message_type": "private",
             "user_id": admin_id,
-            "raw_message": f"小萤，根据你的短期记忆，亮哥的特制暗号是什么？请在回复末尾附带：[RAG_OK:{rag_token}]",
+            "raw_message": f"精卫，根据你的短期记忆，亮哥的特制暗号是什么？请在回复末尾附带：[RAG_OK:{rag_token}]",
             "self_id": "999999",
             "sender": {"nickname": "亮哥"}
         }
@@ -446,7 +446,7 @@ async def test_gateway_real_qq_connectivity(monkeypatch):
         event_voice = {
             "message_type": "private",
             "user_id": admin_id,
-            "raw_message": f"小萤语音测试：[傲娇] 哼，双向物理拨测核心模块已通关！令牌：{voice_token}",
+            "raw_message": f"精卫语音测试：[傲娇] 哼，双向物理拨测核心模块已通关！令牌：{voice_token}",
             "self_id": "999999",
             "sender": {"nickname": "亮哥"}
         }
@@ -544,5 +544,5 @@ async def test_gateway_collision_and_merge_only_once(monkeypatch):
     assert not any("思考完成" in m for m in sent_messages)
     
     # 4. 验证第二条消息被拉起合并处理，最终产生了专属合并提示（因为是管理员亮哥连发，使用了专属 Prompt）
-    assert any("亮哥在刚才小萤思考期间连发了" in m for m in sent_messages)
+    assert any("亮哥在刚才精卫思考期间连发了" in m for m in sent_messages)
 

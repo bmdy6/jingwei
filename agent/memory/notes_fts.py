@@ -1,10 +1,9 @@
-from agent.core.paths import runtime_path, PROJECT_ROOT
 """笔记知识库 FTS5 索引 — PageIndex 全文检索（不切块）。
 
 索引 配置的笔记目录 下的 .md 文件。
 每个文件一行，BM25 全文匹配，LLM 用 read_file 精读结果。
 """
-
+from agent.core.paths import runtime_path, PROJECT_ROOT
 import os
 import re
 import sqlite3
@@ -15,7 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-NOTES_DIR = runtime_path("MYAGENT_NOTES_DIR", "notes")
+NOTES_DIR = runtime_path("JINGWEI_NOTES_DIR", "notes")
 
 # 使用 100% 绝对无乱码的显式 Unicode 转义码点范围
 _CJK_RE = re.compile(r'([\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef])')

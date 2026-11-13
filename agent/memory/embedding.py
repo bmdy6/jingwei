@@ -1,3 +1,4 @@
+from agent.core.environment import env_get
 import os
 import time
 import logging
@@ -69,7 +70,7 @@ async def _get_embedding(manager, text: str) -> list[float]:
             return [0.0] * 768
 
     import litellm
-    model = os.getenv("MYAGENT_EMBEDDING_MODEL", "text-embedding-3-small")
+    model = env_get("JINGWEI_EMBEDDING_MODEL", "text-embedding-3-small")
     api_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
     api_base = os.getenv("EMBEDDING_API_BASE") or os.getenv("OPENAI_API_BASE") or None
     

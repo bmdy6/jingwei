@@ -38,13 +38,13 @@ const C = {
 };
 
 // ── 房间定义 (单位: 显示像素) ───────────────────────────
-// 参考设计图: 电脑房左上, 图书室上中, XL办公室右上, 杂物室右中, 走廊中, 会议室下
+// 参考设计图: 电脑房左上, 图书室上中, 精卫办公室右上, 杂物室右中, 走廊中, 会议室下
 const px = v => v * TILE * SCALE;
 
 const ROOMS = {
   computer: { x: px(0),    y: px(0),    w: px(5.5),  h: px(4.5),  label: '⌨ 电脑房',   floor: 'purple' },
   library:  { x: px(5.5),  y: px(0),    w: px(4.5),  h: px(5),    label: '📚 图书室',   floor: 'wood'   },
-  xl:       { x: px(10),   y: px(0),    w: px(4.5),  h: px(4),    label: '👑 XL办公室', floor: 'carpet' },
+  xl:       { x: px(10),   y: px(0),    w: px(4.5),  h: px(4),    label: '👑 精卫办公室', floor: 'carpet' },
   storage:  { x: px(10),   y: px(4),    w: px(4.5),  h: px(2.5),  label: '📦 杂物室',   floor: 'stone'  },
   hallway:  { x: px(0),    y: px(4.5),  w: px(10),   h: px(1.5),  label: '🚶 走廊',     floor: 'hall'   },
   meeting:  { x: px(2.5),  y: px(6),    w: px(12),   h: px(4.67), label: '🗣 会议室',   floor: 'purple2'},

@@ -1,5 +1,5 @@
 #!/bin/bash
-# MyAgent - 一键停止所有服务总控脚本
+# Jingwei - 一键停止所有服务总控脚本
 # 职责: 安全、彻底地停掉抖音网关、QQ网关、自动学习和 Docker NapCat 容器并完成资源清理
 
 set -e
@@ -9,7 +9,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 echo "=========================================="
-echo " 正在一键终止 MyAgent 全套系统服务..."
+echo " 正在一键终止 Jingwei 全套系统服务..."
 echo "=========================================="
 
 # 1. 停止独立抖音网关
@@ -40,5 +40,5 @@ pkill -9 -f "main.py --douyin" 2>/dev/null || true
 pkill -9 -f "main.py --auto-learn" 2>/dev/null || true
 
 echo "=========================================="
-echo " 🌟 MyAgent 全套服务已全部停止并完成清理！"
+echo " 🌟 Jingwei 全套服务已全部停止并完成清理！"
 echo "=========================================="

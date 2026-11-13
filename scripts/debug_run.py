@@ -10,7 +10,7 @@ async def main():
     agent = build_agent("user_10001")
     print("--- 正在以真实会话 user_10001 初始化小肖 Agent ---")
     
-    user_input = "好，以后你叫小萤"
+    user_input = "好，以后你叫精卫"
     print(f"亮哥发送: {user_input}")
     
     print("--- 开始运行小肖推理流 ---")

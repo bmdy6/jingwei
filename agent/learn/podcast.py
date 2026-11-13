@@ -71,7 +71,7 @@ async def call_tool_with_retry(client, tool_name: str, arguments: dict, max_retr
             await asyncio.sleep(delay * attempt)
 
 
-ACTIVE_PODCAST_JSON = str(runtime_path("MYAGENT_SCRATCH_DIR", "scratch") / "active_podcast.json")
+ACTIVE_PODCAST_JSON = str(runtime_path("JINGWEI_SCRATCH_DIR", "scratch") / "active_podcast.json")
 
 
 async def start_podcast_generation(debug_mode: bool = False) -> Optional[str]:
@@ -234,7 +234,7 @@ async def check_and_download_podcast() -> Optional[str]:
         logger.info(f"🎉 识别到音频已生成完毕！URL: {audio_url}")
         today_str = state.get("date") or datetime.now().strftime("%Y-%m-%d")
         
-        output_dir = str(runtime_path("MYAGENT_SCRATCH_DIR", "scratch"))
+        output_dir = str(runtime_path("JINGWEI_SCRATCH_DIR", "scratch"))
         os.makedirs(output_dir, exist_ok=True)
         local_filename = f"daily_podcast_{today_str}.wav"
         local_path = os.path.join(output_dir, local_filename)

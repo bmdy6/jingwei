@@ -104,7 +104,7 @@ async def test_admin_only_merge(monkeypatch):
     merged_responses = "".join(sent_messages)
     
     # 检查专属合并提示词和拼接的消息
-    assert "亮哥在刚才小萤思考期间连发了 2 条消息" in merged_responses
+    assert "亮哥在刚才精卫思考期间连发了 2 条消息" in merged_responses
     assert "亮哥消息2" in merged_responses
     assert "亮哥消息3" in merged_responses
 
