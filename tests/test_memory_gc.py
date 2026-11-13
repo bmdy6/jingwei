@@ -43,27 +43,12 @@ async def test_memory_gc_and_merge():
         assert not p_proj.exists()
         assert not p_user.exists()
         
-        # 校验：内容应该被正确合并到对应的核心记忆主文件中
-        merged_code_review = Path(temp_memory_dir) / "xl_code_review.md"
-        merged_user_profile = Path(temp_memory_dir) / "user_profile.md"
-        
-        assert merged_code_review.exists()
-        assert merged_user_profile.exists()
-        
-        content_cr = merged_code_review.read_text(encoding="utf-8")
-        content_up = merged_user_profile.read_text(encoding="utf-8")
-        
-        assert "这是我项目中的重要教训" in content_cr
-        assert "亮哥喜欢极简中文语气" in content_up
-        
-        # 校验：MEMORY.md 里的旧碎片文件索引已被剔除
-        index_content = manager.index_file.read_text(encoding="utf-8")
-        assert ref_proj_file not in index_content
-        assert ref_user_file not in index_content
-        
-        # 校验：核心文件的索引描述被添加至 MEMORY.md
-        assert "xl_code_review.md" in index_content
-        assert "user_profile.md" in index_content
+        # Core memories are stored in SQLite; no new Markdown copies are created.
+        rows = manager._get_db().execute("SELECT title, content FROM knowledge_items").fetchall()
+        assert any(title == "xl_code_review" and "这是我项目中的重要教训" in content for title, content in rows)
+        assert any(title == "user_profile" and "亮哥喜欢极简中文语气" in content for title, content in rows)
+        assert ref_proj_file not in manager.index_file.read_text()
+        assert ref_user_file not in manager.index_file.read_text()
 
     finally:
         if os.path.exists(temp_memory_dir):

@@ -23,7 +23,7 @@ async def test_bash_find_security_interception():
     assert "[行为拦截提示]" not in results_safe[0].data
 
     # 2. 测试大范围全盘 find，且不带 -maxdepth，应当【拦截】并返回行为拦截提示
-    gen_unsafe = tool.call({"command": "find /path/to/user -name '*.png'"})
+    gen_unsafe = tool.call({"command": f"find {Path.home()} -name '*.png'"})
     results_unsafe = []
     async for res in gen_unsafe:
         results_unsafe.append(res)
@@ -33,7 +33,7 @@ async def test_bash_find_security_interception():
     # 3. 测试大范围全盘 find，但带了 -maxdepth，应当【放行】
     # 为了避免真实执行慢，我们使用一个不存在的目录或带 maxdepth 的 find。
     # 注意，即使真实执行，带了 maxdepth 也不会卡死。
-    gen_with_depth = tool.call({"command": "find /path/to/user -maxdepth 2 -name '*.png'"})
+    gen_with_depth = tool.call({"command": f"find {Path.home()} -maxdepth 2 -name '*.png'"})
     results_with_depth = []
     async for res in gen_with_depth:
         results_with_depth.append(res)
@@ -41,7 +41,7 @@ async def test_bash_find_security_interception():
     assert "[行为拦截提示]" not in results_with_depth[0].data
 
     # 4. 测试多语句 find 绕过（如其中一个在大范围且无 -maxdepth，另一个在项目内）
-    gen_multi = tool.call({"command": f"find {project_dir} -name '*.py'; find /path/to/user/Desktop -name '*.png'"})
+    gen_multi = tool.call({"command": f"find {project_dir} -name '*.py'; find {Path.home()}/Desktop -name '*.png'"})
     results_multi = []
     async for res in gen_multi:
         results_multi.append(res)

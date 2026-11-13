@@ -7,7 +7,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/path/to/user/bot-我的自搭建agent/肖亮搭建的agent/启动QQAgent.command</string>
+        <string>__PROJECT_ROOT__/bin/start.sh</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -17,10 +17,10 @@
         <false/>
     </dict>
     <key>StandardOutPath</key>
-    <string>/path/to/user/.xlagent/qq_agent.log</string>
+    <string>__HOME__/.xl-agent/qq_agent.log</string>
     <key>StandardErrorPath</key>
-    <string>/path/to/user/.xlagent/qq_agent.err</string>
+    <string>__HOME__/.xl-agent/qq_agent.err</string>
     <key>WorkingDirectory</key>
-    <string>/path/to/user/bot-我的自搭建agent/肖亮搭建的agent</string>
+    <string>__PROJECT_ROOT__</string>
 </dict>
 </plist>

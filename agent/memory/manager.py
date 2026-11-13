@@ -127,7 +127,7 @@ class MemoryManager:
         admin_id = os.getenv("QQ_ADMIN_ID", sec_cfg.get("admin_id", ""))
         
         # 2. 定位基础物理路径 (默认 "~/.my-agent/memory")
-        base_dir_str = memory_cfg.get("base_dir", "~/.my-agent/memory")
+        base_dir_str = os.getenv("MYAGENT_MEMORY_DIR") or memory_cfg.get("base_dir", "~/.xl-agent/memory")
         
         if base_dir:
             self.base_dir = Path(base_dir)
@@ -142,7 +142,7 @@ class MemoryManager:
         if admin_id:
             self.backup_dir = self.backup_dir / admin_id
 
-        self.auto_backup = memory_cfg.get("auto_backup_to_project", True)
+        self.auto_backup = memory_cfg.get("auto_backup_to_project", False)
 
         # 4. 逆向自愈还原引擎：主目录空但备份目录存在，判定为“换家”，自动在后台无缝复制还原！
         db_file = self.base_dir / "memories.db"

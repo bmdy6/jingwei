@@ -1,3 +1,4 @@
+from agent.core.paths import runtime_path, PROJECT_ROOT
 import asyncio
 import json
 import logging
@@ -8,6 +9,8 @@ import time
 from datetime import datetime, timezone
 from typing import Optional
 import aiohttp
+from aiohttp import web
+from pathlib import Path
 
 from .context import GatewayContext
 from .dispatcher import MessageDispatcher
@@ -66,6 +69,11 @@ class QQGateway:
 
     async def run(self):
         """网关启动主协程，启动 WebSocket 长连接、Brain HTTP 服务及守护协程。"""
+        from agent.core.config import settings
+        if not settings.enabled("QQ_ENABLED"):
+            raise RuntimeError("QQ gateway disabled; set QQ_ENABLED=true explicitly")
+        if not self.admin_id:
+            raise RuntimeError("QQ_ADMIN_ID is required when QQ_ENABLED=true")
         from .tts import send_voice
         async def custom_send_voice(msg_type, user_id, group_id, text, style="知性", is_test=False):
             try:
@@ -111,7 +119,7 @@ class QQGateway:
         self._brain_runner = web.AppRunner(app)
         await self._brain_runner.setup()
         port = int(os.getenv("BRAIN_PORT", "8000"))
-        host = os.getenv("BRAIN_HOST", "0.0.0.0") # 默认自适应绑定 0.0.0.0，彻底打通手机端在局域网内的一键预览与下载！
+        host = os.getenv("BRAIN_HOST", "127.0.0.1") # 默认自适应绑定 0.0.0.0，彻底打通手机端在局域网内的一键预览与下载！
         site = web.TCPSite(self._brain_runner, host, port)
         await site.start()
         logger.info(f"Main Brain Event Server listening on http://{host}:{port}")
@@ -123,7 +131,7 @@ class QQGateway:
         """后台轮询协程：每隔 1 小时自动物理清退超过 24 小时的临时 UUID HTML 文件"""
         import time
         from pathlib import Path
-        output_dir = Path("/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/agent/resources/stitch_outputs")
+        output_dir = runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs")
         while True:
             try:
                 if output_dir.exists():
@@ -149,9 +157,9 @@ class QQGateway:
             if file_id:
                 # 过滤路径穿越安全隐患
                 safe_id = "".join([c for c in file_id if c.isalnum() or c in ("-", "_")])
-                file_path = Path("/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/agent/resources/stitch_outputs") / f"{safe_id}.html"
+                file_path = runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs") / f"{safe_id}.html"
             else:
-                file_path = Path("/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/stitch_latest.html")
+                file_path = runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs") / "stitch_latest.html"
 
             if not file_path.exists():
                 return web.Response(
@@ -217,7 +225,7 @@ class QQGateway:
 
             # 1. 物理强隔离：分配独立的 UUID
             file_uuid = str(uuid.uuid4())
-            dest_dir = Path("/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/agent/resources/stitch_outputs")
+            dest_dir = runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs")
             dest_dir.mkdir(parents=True, exist_ok=True)
             dest_path = dest_dir / f"{file_uuid}.html"
 

@@ -31,10 +31,10 @@ def get_kb_dir() -> str:
     """动态获取 KB_DIR，避免模块载入时的循环导入"""
     from agent.core.config import settings
     kb_cfg = settings.get("knowledge_base") or {}
-    kb_dir_cfg = kb_cfg.get("kb_dir")
+    kb_dir_cfg = os.getenv("MYAGENT_KB_DIR") or kb_cfg.get("kb_dir")
     if kb_dir_cfg:
         return os.path.expanduser(kb_dir_cfg)
-    return os.getenv("MYAGENT_KB_DIR", str(Path.home() / "Documents" / "个人博客" / "学习笔记" / "agent自主学习的东西"))
+    return os.getenv("MYAGENT_KB_DIR", str(Path.home() / ".xl-agent" / "notes"))
 
 def get_knowledge_index() -> Path:
     return Path(get_kb_dir()) / "知识索引.md"
@@ -46,7 +46,7 @@ def get_default_routing_rules() -> str:
     if notes_paths:
         notes_root = os.path.expanduser(notes_paths[0])
     else:
-        notes_root = str(Path.home() / "Desktop" / "学习笔记")
+        notes_root = os.getenv("MYAGENT_NOTES_DIR", str(Path.home() / ".xl-agent" / "notes"))
     
     return f"""# 知识路由规则
 

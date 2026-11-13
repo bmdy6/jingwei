@@ -1,3 +1,4 @@
+from agent.core.paths import runtime_path, PROJECT_ROOT
 """NotebookLM MCP 客户端接口与高保真静默下载器 (自 auto_podcast 解耦)"""
 
 import os
@@ -16,15 +17,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 def get_notebooklm_config():
     """获取动态解析的 notebooklm 集中配置项"""
     cfg = settings.get("notebooklm", {})
-    vpath = cfg.get("vault_path", "/path/to/user/Documents/个人博客/学习笔记")
-    bpath = cfg.get("bin_path", "/path/to/user/.gemini/antigravity/scratch/venv/bin/notebooklm-mcp")
-    env = cfg.get("env", {
-        "HOME": "/path/to/user/.gemini/antigravity/scratch",
-        "HTTP_PROXY": "http://127.0.0.1:7897",
-        "HTTPS_PROXY": "http://127.0.0.1:7897",
-        "ALL_PROXY": "http://127.0.0.1:7897",
-        "PATH": "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    })
+    vpath = os.getenv("MYAGENT_NOTES_DIR") or cfg.get("vault_path") or str(runtime_path("MYAGENT_NOTES_DIR", "notes"))
+    bpath = os.getenv("NOTEBOOKLM_BIN") or cfg.get("bin_path") or "notebooklm-mcp"
+    env = cfg.get("env") or {}
     return vpath, bpath, env
 
 class NotebookLMMCPClient:
@@ -120,7 +115,7 @@ class NotebookLMMCPClient:
 def load_notebooklm_cookies() -> dict:
     """加载 ~/.notebooklm-mcp/auth.json 中的 Cookies，用于高保真文件下载的身份验证."""
     _, _, n_env = get_notebooklm_config()
-    auth_path = "/path/to/user/.notebooklm-mcp/auth.json"
+    auth_path = os.getenv("NOTEBOOKLM_AUTH_FILE", str(__import__("pathlib").Path.home() / ".notebooklm-mcp" / "auth.json"))
     if not os.path.exists(auth_path):
         auth_path = os.path.join(n_env["HOME"], ".notebooklm-mcp/auth.json")
     if not os.path.exists(auth_path):

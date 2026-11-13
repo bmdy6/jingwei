@@ -1,3 +1,4 @@
+from agent.core.paths import runtime_path, PROJECT_ROOT
 """小萤专属 NotebookLM 播客全自动投喂与查询工具.
 
 提供 feed_text 发起云端生成和 query_status 触发常规 Chrome 捕获下载两大功能。
@@ -311,7 +312,7 @@ class NotebookLMTool(BaseTool):
                         
                         # 自主执行共享目录拷贝与 upload_private_file 推送给亮哥
                         import shutil
-                        share_dir = "/path/to/user/napcat-data-tmp"
+                        share_dir = str(runtime_path("NAPCAT_SHARE_DIR", "napcat-share"))
                         dest_filename = os.path.basename(local_path)
                         host_dest_path = os.path.join(share_dir, dest_filename)
                         container_dest_path = f"/app/.config/QQ/{dest_filename}"

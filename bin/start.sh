@@ -7,6 +7,13 @@ set -e
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR"
 
+# Explicit opt-in is required before touching Docker or messaging services.
+if [ "${QQ_ENABLED:-false}" != "true" ] || [ -z "${QQ_BOT_ID:-}" ] || [ -z "${QQ_ADMIN_ID:-}" ]; then
+    echo "Set QQ_ENABLED=true, QQ_BOT_ID and QQ_ADMIN_ID before starting QQ."
+    exit 1
+fi
+mkdir -p "$PROJECT_DIR/logs"
+
 QQ_NUMBER="${QQ_BOT_ID:-}"
 NAPCAT_DATA_DIR="$HOME/.xlagent/napcat_data"
 mkdir -p "$NAPCAT_DATA_DIR"
@@ -181,7 +188,7 @@ else
         cd "$TTS_DIR"
         pkill -f "api_v2.py" || true
         # 启动后台服务 (用绝对路径调用 api_v2.py，不用星号)
-        nohup ./venv/bin/python3 api_v2.py -a 127.0.0.1 -p 9880 > tts.log 2>&1 &
+        nohup ./.venv/bin/python3 api_v2.py -a 127.0.0.1 -p 9880 > tts.log 2>&1 &
         cd "$PROJECT_DIR"
         sleep 3
         if curl -s --connect-timeout 2 http://127.0.0.1:9880/ >/dev/null 2>&1; then
@@ -207,7 +214,7 @@ if launchctl list 2>/dev/null | grep -q com.myagent.qqgateway; then
         echo "   - Gateway 启动异常，请检查 launchd 配置" | tee -a "$STARTUP_LOG"
     fi
 else
-    nohup venv/bin/python main.py --gateway >> "$STARTUP_LOG" 2>&1 &
+    nohup .venv/bin/python main.py --gateway >> "$STARTUP_LOG" 2>&1 &
     sleep 2
     if ps aux | grep -q "main.py --gateway"; then
         echo "   - Gateway (Nohup 模式) 启动并运行中" | tee -a "$STARTUP_LOG"

@@ -13,50 +13,10 @@ from agent.tools.skill_usage_tool import RecordSkillUsageTool
 from agent.core.prompt_builder import _search_experiences
 
 @pytest.fixture(autouse=True)
-def setup_test_sandbox():
-    """为每次测试提供干净独立的沙箱隔离记忆脑区环境"""
-    project_root = Path(__file__).resolve().parents[1]
-    test_isolated_dir = project_root / "agent_memory" / "core" / "test_isolated"
-    
-    # 强制安全清理之前的脏数据
-    if test_isolated_dir.exists():
-        shutil.rmtree(test_isolated_dir)
-    test_isolated_dir.mkdir(parents=True, exist_ok=True)
-    
-    # 创建临时的测试 sub-experiences 与 sub-skills 目录
-    test_exp_dir = project_root / "agent_memory" / "experiences"
-    test_skills_dir = project_root / "agent_memory" / "skills"
-    test_context_dir = project_root / "agent_memory" / "context"
-    
-    for d in [test_exp_dir, test_skills_dir, test_context_dir]:
-        d.mkdir(parents=True, exist_ok=True)
-        
-    # 清空 SQLite 中可能残留的 test_case_ 前缀脏测试记录
-    try:
-        mm = MemoryManager()
-        db_path = mm.base_dir / "memories.db"
-        if db_path.exists():
-            conn = sqlite3.connect(str(db_path))
-            with conn:
-                conn.execute("DELETE FROM skill_usage WHERE skill_name LIKE 'test_case_%'")
-            conn.close()
-    except Exception:
-        pass
-
-    yield {
-        "isolated_dir": test_isolated_dir,
-        "exp_dir": test_exp_dir,
-        "skills_dir": test_skills_dir,
-        "context_dir": test_context_dir
-    }
-    
-    # 测试完毕后清理临时创建的测试用例文件，防止污染生产脑区
-    for f in test_exp_dir.glob("test_case_*.md"):
-        f.unlink()
-    for f in test_skills_dir.glob("test_case_*.md"):
-        f.unlink()
-    for f in test_context_dir.glob("coworker_test_*.json"):
-        f.unlink()
+def setup_test_sandbox(tmp_path):
+    from agent.core import paths
+    return {"isolated_dir": tmp_path, "exp_dir": paths.EXPERIENCES_DIR,
+            "skills_dir": paths.SKILLS_DIR, "context_dir": paths.CONTEXT_DIR}
 
 @pytest.mark.asyncio
 async def test_coworker_context_memory_flow(setup_test_sandbox):
@@ -88,32 +48,15 @@ async def test_coworker_context_memory_flow(setup_test_sandbox):
     assert "偏好使用 Python" in data["memories"]
     assert len(data["memories"]) <= 3
 
-def test_experience_rag_search_flow(setup_test_sandbox):
-    """测试 Task 2.2 & 4.3: 避坑经验在 agent_memory/experiences/ 中的 RAG 检索命中挂载"""
-    exp_dir = setup_test_sandbox["exp_dir"]
-    
-    # 写入一条模拟避坑经验
-    test_exp_file = exp_dir / "test_case_avoid_git_conflict.md"
-    content = """---
-name: test_case_avoid_git_conflict
-trigger: git/冲突/分支/merge
-description: 模拟如何安全解决 Git 冲突避坑指南
-usage_count: 0
-success_count: 0
-category: verification
----
-
-# 模拟避坑指南
-在合并分支前，必须先执行 git fetch origin 保证绝对安全！
-"""
-    test_exp_file.write_text(content, encoding="utf-8")
-    
-    # 运行 RAG 检索匹配
-    matched_block = _search_experiences("我今天写代码遇到了 git 冲突怎么办")
-    
-    assert "[DYNAMIC EXPERIENCE BLOCK]" in matched_block
-    assert "git fetch origin" in matched_block
-    assert "test_case_avoid_git_conflict" in matched_block
+@pytest.mark.asyncio
+async def test_experience_rag_search_flow(setup_test_sandbox):
+    from types import SimpleNamespace
+    memory = MemoryManager()
+    memory.save_ki({"id": "test_git", "title": "git 冲突", "category": "experience", "keywords": ["git"],
+                    "summary": "解决冲突", "content": "git fetch origin", "ki_type": "experience"})
+    matched = await _search_experiences(SimpleNamespace(memory=memory), "git")
+    assert "MEMORY BLOCK" in matched
+    assert "git fetch origin" in matched
 
 @pytest.mark.asyncio
 async def test_experience_to_skills_promotion_flow(setup_test_sandbox):
@@ -138,6 +81,9 @@ category: verification
 """
     exp_file.write_text(content, encoding="utf-8")
     
+    memory = MemoryManager()
+    memory.save_ki({"id": "test_skill", "title": skill_name, "category": "experience", "keywords": [skill_name],
+                    "summary": "调试经验", "content": content, "ki_type": "experience"})
     tool = RecordSkillUsageTool()
     
     # 1. 模拟 4 次成功打卡，此时 usage_count=4，应该依然保留在 experiences 目录下
@@ -145,7 +91,7 @@ category: verification
         res_list = []
         async for res in tool.call({"skill_name": skill_name, "success": True}, context=None):
             res_list.append(res)
-        assert "Successfully recorded" in res_list[0].data
+        assert "已记录" in res_list[0].data
         
     assert exp_file.exists()
     assert not (skills_dir / f"{skill_name}.md").exists()
@@ -155,13 +101,11 @@ category: verification
     async for res in tool.call({"skill_name": skill_name, "success": True}, context=None):
         res_list.append(res)
         
-    assert "技能进化成功" in res_list[0].data
+    assert "技能晋级" in res_list[0].data
     
-    # 3. 验证物理搬家流转结果：experiences/ 文件消失，完美晋升并出现在 skills/ 目录下！
-    assert not exp_file.exists(), "原 experiences 中的经验文件没有被清理剪切！"
-    promoted_file = skills_dir / f"{skill_name}.md"
-    assert promoted_file.exists(), "晋升后的常驻技能文件没有在 skills/ 目录正确生成！"
-    
+    # Promotion updates the SQLite KI; legacy files are not moved.
+    assert memory._get_db().execute("SELECT ki_type FROM knowledge_items WHERE id='test_skill'").fetchone()[0] == "skill"
+
     # 4. 验证 SQLite 中的 is_skills 标记为 1
     mm = MemoryManager()
     db_path = mm.base_dir / "memories.db"

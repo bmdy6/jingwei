@@ -6,22 +6,22 @@
     <string>com.myagent.qqgateway</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/venv/bin/python</string>
+        <string>__PROJECT_ROOT__/.venv/bin/python</string>
         <string>main.py</string>
         <string>--gateway</string>
     </array>
     <key>StandardOutPath</key>
-    <string>/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/logs/gateway.log</string>
+    <string>__PROJECT_ROOT__/logs/gateway.log</string>
     <key>StandardErrorPath</key>
-    <string>/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/logs/gateway.err</string>
+    <string>__PROJECT_ROOT__/logs/gateway.err</string>
     <key>WorkingDirectory</key>
-    <string>/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent</string>
+    <string>__PROJECT_ROOT__</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
         <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>HOME</key>
-        <string>/path/to/user</string>
+        <string>__HOME__</string>
     </dict>
     <key>RunAtLoad</key>
     <true/>

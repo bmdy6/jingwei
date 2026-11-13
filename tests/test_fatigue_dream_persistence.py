@@ -153,11 +153,12 @@ async def test_gateway_cold_start_recovery(temp_workspace):
         break
     
     # 4. 断言已完美续接！消息列表包含冷启动自愈载入的 2 条旧消息 + 刚进来的 1 条新消息 + 刚生成的 1 条回复消息
-    assert len(agent.messages) == 4
-    assert agent.messages[0]["content"] == "你好小萤"
-    assert agent.messages[1]["content"] == "亮哥好！"
-    assert agent.messages[2]["content"] == "亮哥发来重启后的首条新消息"
-    assert agent.messages[3]["content"] == "好的，我已经收到重启后的消息。"
+    dialogue = [m for m in agent.messages if m["role"] != "system"]
+    assert len(dialogue) == 4
+    assert dialogue[0]["content"] == "你好小萤"
+    assert dialogue[1]["content"] == "亮哥好！"
+    assert dialogue[2]["content"] == "亮哥发来重启后的首条新消息"
+    assert dialogue[3]["content"] == "好的，我已经收到重启后的消息。"
 
 
 @pytest.mark.asyncio

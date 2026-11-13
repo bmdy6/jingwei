@@ -1,4 +1,4 @@
-# XL Agent — 工业级 Makefile (v3.0)
+# XL Agent — Makefile (v3.0)
 # 用法: make setup | up | build | logs | qrcode | update
 
 .PHONY: setup up build logs qrcode update clean gateway-restart
@@ -57,7 +57,7 @@ qrcode:
 # ── 一键更新并重启 ──
 update:
 	@echo "🔄 拉取最新代码..."
-	git pull origin master
+	git pull --ff-only origin main
 	@echo "🔨 重新构建..."
 	docker compose build --build-arg USE_MIRROR=$(IS_CN)
 	docker compose up -d --force-recreate

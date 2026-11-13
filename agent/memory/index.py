@@ -109,7 +109,10 @@ def _get_db(manager) -> sqlite3.Connection:
                     last_hit_at TEXT NOT NULL,
                     visit_count INTEGER DEFAULT 0,
                     version INTEGER DEFAULT 1,
-                    revision_history TEXT
+                    revision_history TEXT,
+                    ki_type TEXT DEFAULT 'micro',
+                    parent_id TEXT,
+                    child_ids TEXT
                 )
             """)
             
@@ -135,12 +138,17 @@ def _get_db(manager) -> sqlite3.Connection:
                         manager._db.execute("ROLLBACK")
                         raise tx_err
             
+            columns = {row[1] for row in manager._db.execute("PRAGMA table_info(knowledge_items)")}
+            for column in ("parent_id", "child_ids"):
+                if column not in columns:
+                    manager._db.execute(f"ALTER TABLE knowledge_items ADD COLUMN {column} TEXT")
+            manager._db.commit()
+
             # 创建高精度 CJK 知识全文检索虚拟表
-            manager._db.execute("""
-                CREATE VIRTUAL TABLE IF NOT EXISTS kis_fts
-                USING fts5(ki_id, title, category, keywords, summary, content,
-                           tokenize="porter unicode61")
-            """)
+            from .fts_index import create_search_table
+            create_search_table(manager._db, "kis_fts",
+                                ("ki_id", "title", "category", "keywords", "summary", "content"),
+                                "porter unicode61")
             # 创建短期记忆实时持久化表 active_sessions
             manager._db.execute("""
                 CREATE TABLE IF NOT EXISTS active_sessions (

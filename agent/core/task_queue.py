@@ -1,3 +1,6 @@
+from __future__ import annotations
+from agent.core.paths import runtime_path, PROJECT_ROOT
+
 """任务队列 — 文件持久化，支持定时/重复任务.
 
 Agent 通过 schedule_task tool 自主管理任务，无需硬编码。
@@ -17,7 +20,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-QUEUE_DIR = Path("/path/to/user/bot-我的自搭建agent/agent培养/xl进化/任务队列")
+QUEUE_DIR = runtime_path("MYAGENT_QUEUE_DIR", "tasks")
 
 
 def parse_natural_time(text: str):

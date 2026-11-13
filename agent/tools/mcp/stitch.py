@@ -1,7 +1,11 @@
+from agent.core.paths import runtime_path, PROJECT_ROOT
 import json
 import logging
 import os
 import asyncio
+import sys
+import shlex
+from pathlib import Path
 from typing import Any, AsyncGenerator, Optional
 from ..base_tool import BaseTool, ToolResult
 
@@ -99,7 +103,7 @@ class StitchTool(BaseTool):
             yield ToolResult(type="progress", data=f"Stitch: 正在生成 {风格提示} 的UI...")
 
             # 确定写盘的目标路径
-            target_dest = dest_path or "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/stitch_latest.html"
+            target_dest = dest_path or str(runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs") / "stitch_latest.html")
 
             # 1. 尝试通过 MCP 协议生成 UI
             html_css = await self._generate_via_mcp(prompt, style, project_id=project_id)
@@ -117,7 +121,7 @@ class StitchTool(BaseTool):
             # 4. 统一最终强制写盘（针对 MCP 成功和 Fallback 成功的情况进行安全持久化）
             if html_css and not html_css.startswith("Error:"):
                 try:
-                    os.makedirs(os.path.dirname(target_dest), exist_ok=True)
+                    Path(target_dest).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
                     with open(target_dest, "w", encoding="utf-8") as f:
                         f.write(html_css)
                     logger.info(f"🎉 Stitch: Successfully saved code to {target_dest}")
@@ -148,18 +152,18 @@ class StitchTool(BaseTool):
         """主动从 Google Stitch REST API 拉取指定项目下最新生成的 Screen UI 代码并自动落盘."""
         import subprocess
         try:
-            gcloud_bin = "/path/to/user/.stitch-mcp/google-cloud-sdk/bin/gcloud"
-            creds_file = "/path/to/user/.config/gcloud/application_default_credentials.json"
-            config = "/path/to/user/.stitch-mcp/config"
+            gcloud_bin = os.getenv("STITCH_GCLOUD_BIN", "gcloud")
+            creds_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", str(Path.home() / ".config/gcloud/application_default_credentials.json"))
+            config = os.getenv("STITCH_CLOUDSDK_CONFIG", str(Path.home() / ".stitch-mcp/config"))
             quota_project = STITCH_QUOTA_PROJECT or ""
-            venv_python = "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/venv/bin/python3"
+            venv_python = os.getenv("STITCH_PYTHON", sys.executable)
 
             env_copy = dict(os.environ)
             env_copy["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
             env_copy["CLOUDSDK_CONFIG"] = config
             env_copy["CLOUDSDK_PYTHON"] = venv_python
             env_copy["GOOGLE_CLOUD_PROJECT"] = ""
-            env_copy["PATH"] = f"{os.path.dirname(gcloud_bin)}:/path/to/user/.nvm/versions/node/v25.8.0/bin:{os.environ.get('PATH','')}"
+            env_copy["PATH"] = os.environ.get("PATH", "/usr/bin:/bin")
 
             loop = asyncio.get_running_loop()
             proc = await loop.run_in_executor(None, lambda: subprocess.run(
@@ -210,9 +214,9 @@ class StitchTool(BaseTool):
             if html:
                 full_html = f"<style>{css}</style>\n{html}"
                 # 自动保存落盘到指定项目根目录下，解决小萤异步丢失问题
-                target_dest = dest_path or "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/stitch_latest.html"
+                target_dest = dest_path or str(runtime_path("STITCH_OUTPUT_DIR", "stitch_outputs") / "stitch_latest.html")
                 try:
-                    os.makedirs(os.path.dirname(target_dest), exist_ok=True)
+                    Path(target_dest).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
                     with open(target_dest, "w", encoding="utf-8") as f:
                         f.write(full_html)
                     logger.info(f"🎉 Stitch: Successfully saved code to {target_dest}")
@@ -228,18 +232,18 @@ class StitchTool(BaseTool):
         """通过 Stitch REST API 直接生成 UI."""
         import subprocess
         try:
-            gcloud_bin = "/path/to/user/.stitch-mcp/google-cloud-sdk/bin/gcloud"
-            creds_file = "/path/to/user/.config/gcloud/application_default_credentials.json"
-            config = "/path/to/user/.stitch-mcp/config"
+            gcloud_bin = os.getenv("STITCH_GCLOUD_BIN", "gcloud")
+            creds_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", str(Path.home() / ".config/gcloud/application_default_credentials.json"))
+            config = os.getenv("STITCH_CLOUDSDK_CONFIG", str(Path.home() / ".stitch-mcp/config"))
             quota_project = STITCH_QUOTA_PROJECT or ""
-            venv_python = "/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/venv/bin/python3"
+            venv_python = os.getenv("STITCH_PYTHON", sys.executable)
 
             env_copy = dict(os.environ)
             env_copy["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
             env_copy["CLOUDSDK_CONFIG"] = config
             env_copy["CLOUDSDK_PYTHON"] = venv_python
             env_copy["GOOGLE_CLOUD_PROJECT"] = ""
-            env_copy["PATH"] = f"{os.path.dirname(gcloud_bin)}:/path/to/user/.nvm/versions/node/v25.8.0/bin:{os.environ.get('PATH','')}"
+            env_copy["PATH"] = os.environ.get("PATH", "/usr/bin:/bin")
 
             loop = asyncio.get_running_loop()
             proc = await loop.run_in_executor(None, lambda: subprocess.run(
@@ -304,29 +308,23 @@ class StitchTool(BaseTool):
     async def _generate_via_mcp(self, prompt: str, style: str, project_id: str = "") -> Optional[str]:
         """通过 MCP 协议调用 Stitch Server."""
         try:
-            loop = asyncio.get_running_loop()
-            import subprocess as _sp
-            
-            script = f"""
-export GOOGLE_CLOUD_PROJECT=
-export PATH="/path/to/user/.stitch-mcp/google-cloud-sdk/bin:/path/to/user/.nvm/versions/node/v25.8.0/bin:$PATH"
-export CLOUDSDK_PYTHON=/path/to/user/bot-我的自搭建agent/新的agent/Xl-General-AI-Agent/venv/bin/python3
-cat <<'MCP_INPUT' | /path/to/user/.npm/_npx/d7bcf1e9427e7044/node_modules/.bin/stitch-mcp 2>/dev/null
-{json.dumps({"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"xl-agent","version":"2.0"}}})}
-{json.dumps({"jsonrpc":"2.0","method":"notifications/initialized"})}
-{json.dumps({"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"generate_screen_from_text","arguments":{"projectId":project_id,"prompt":prompt,"deviceType":"DESKTOP","modelId":"GEMINI_3_1_PRO"}}})}
-MCP_INPUT"""
-            result = await loop.run_in_executor(None, lambda: _sp.run(
-                ["bash", "-c", script],
-                capture_output=True, text=True, timeout=STITCH_TIMEOUT))
-            if result.returncode != 0:
-                logger.warning(f"Stitch shell failed: {result.stderr[:200]}")
+            if not STITCH_SERVER_CMD:
                 return None
-
-            for line in result.stdout.split("\n"):
+            from .protocol import StdioTransport, MCPClient
+            transport = StdioTransport(shlex.split(STITCH_SERVER_CMD), env=_get_stitch_env())
+            client = MCPClient(transport)
+            try:
+                await asyncio.wait_for(client.initialize(), timeout=STITCH_TIMEOUT)
+                data = await asyncio.wait_for(client.call_tool("generate_screen_from_text", {
+                    "projectId": project_id, "prompt": prompt, "deviceType": "DESKTOP",
+                    "modelId": "GEMINI_3_1_PRO",
+                }), timeout=STITCH_TIMEOUT)
+            finally:
+                await transport.close()
+            for line in [json.dumps(data)]:
                 try:
                     data = json.loads(line)
-                    if data.get("id") == 2:
+                    if "result" in data:
                         for item in data.get("result", {}).get("content", []):
                             if item.get("type") == "text":
                                 raw = item.get("text", "")
@@ -375,5 +373,5 @@ MCP_INPUT"""
         css = styles_map.get(style, styles_map["modern"])
         return f"""<div style="padding: 24px; {css}">
   <h3>{prompt[:60]}</h3>
-  <p>Stitch MCP 已连接，但需要 OAuth 以完成项目操作。确认或运行: npx @_davideast/stitch-mcp init --client cc</p>
+  <p>这是离线模板，未完成远端生成。配置 Stitch 服务和 OAuth 后可运行: npx @_davideast/stitch-mcp init --client cc</p>
 </div>"""

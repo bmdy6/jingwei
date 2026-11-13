@@ -250,7 +250,6 @@ async def trigger_deep_dream_evolution(agent, history_messages=None) -> str:
                 md_content = result_skill.get("skill_md_content", "")
                 
                 if folder_name and md_content:
-                    import hashlib
                     trigger = result_skill.get("trigger", folder_name)
                     desc = result_skill.get("description", "会话自提炼与梦境进化得出的实战经验")
                     ki_id = f"dream_exp_{hashlib.md5(folder_name.encode()).hexdigest()[:12]}"

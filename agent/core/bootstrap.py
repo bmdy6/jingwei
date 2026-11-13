@@ -12,7 +12,7 @@ def _load_dotenv():
     env_file = Path(__file__).resolve().parents[2] / ".env"
     if env_file.exists():
         from dotenv import load_dotenv
-        load_dotenv(env_file, override=True)
+        load_dotenv(env_file, override=False)
 
 from contextvars import ContextVar
 from logging.handlers import RotatingFileHandler
@@ -121,8 +121,8 @@ def build_agent(session_id: str = "default"):
     api_key = os.environ.get("MYAGENT_API_KEY") or os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
     api_base = os.environ.get("MYAGENT_API_BASE") or os.environ.get("OPENAI_API_BASE")
 
-    model_flash = os.environ.get("MYAGENT_MODEL_FLASH", "deepseek/deepseek-v4-flash")
-    model_pro = os.environ.get("MYAGENT_MODEL_PRO", "deepseek/deepseek-v4-pro")
+    model_flash = os.environ.get("MYAGENT_MODEL_FLASH") or model_vision
+    model_pro = os.environ.get("MYAGENT_MODEL_PRO") or model_flash
 
     max_tokens = int(os.environ.get("MYAGENT_MAX_TOKENS", "8192"))
     llm = LLMClient(
@@ -147,7 +147,8 @@ def build_agent(session_id: str = "default"):
         registry.register(WebFetchTool())
         registry.register(ReadImageTool())
         registry.register(Image2GenerateTool())
-        registry.register(SendImageToQqTool())
+        if settings.enabled("QQ_ENABLED"):
+            registry.register(SendImageToQqTool())
         registry.register(SpawnAgentTool())
         registry.register(StitchTool())
         registry.register(RecordSkillUsageTool())
@@ -157,8 +158,10 @@ def build_agent(session_id: str = "default"):
         registry.register(ScheduleTaskTool())
         registry.register(XiaohongshuTool())
         registry.register(NotebookLMTool())
-        registry.register(GetQQStatusTool())
-        registry.register(SendQQMessageTool())
+        if settings.enabled("QQ_ENABLED"):
+            registry.register(GetQQStatusTool())
+        if settings.enabled("QQ_ENABLED"):
+            registry.register(SendQQMessageTool())
         registry.register(BrowserAgentTool())
 
     memory = MemoryManager()

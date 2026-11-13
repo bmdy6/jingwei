@@ -65,6 +65,7 @@ async def test_prompt_builder_ki_structuring(test_env):
     
     # Mock agent 实例以模拟 build_memory_block 调用环境
     agent = MagicMock()
+    agent._create_tracked_task.side_effect = lambda coro: coro.close()
     agent._turn_count = 0
     agent.messages = [{"role": "user", "content": "我想调试大模型缓存"}]
     agent.memory = manager
@@ -108,6 +109,7 @@ async def test_react_loop_caching_front_injection(test_env):
     
     # Mock 一个极简 agent，使其支持 ReAct 循环
     agent = MagicMock()
+    agent._create_tracked_task.side_effect = lambda coro: coro.close()
     agent.max_turns = 2
     agent._mode.value = "normal"
     agent._task_start_time = 0.0
@@ -171,6 +173,7 @@ async def test_react_loop_dynamic_insertion_point(test_env):
     
     # Mock 一个极简 agent，使其支持 ReAct 循环
     agent = MagicMock()
+    agent._create_tracked_task.side_effect = lambda coro: coro.close()
     agent.max_turns = 2
     agent._mode.value = "normal"
     agent._task_start_time = asyncio.get_event_loop().time()

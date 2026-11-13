@@ -7,3 +7,10 @@ playwright>=1.52
 # 根据需要添加其他库
 sentence-transformers>=2.2.2
 cloakbrowser
+aiofiles>=24.1
+PyYAML>=6.0
+rich>=13.9
+mcp>=1.9
+ddgs>=9.0
+cos-python-sdk-v5>=1.9
+Pillow>=10.4

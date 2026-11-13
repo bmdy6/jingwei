@@ -165,7 +165,6 @@ async def on_session_end(agent):
                     steps = pattern.get("steps", [])
                     trigger = pattern.get("trigger", "")
                     if name and len(steps) >= 2:
-                        import re, hashlib
                         safe_name = re.sub(r'[^\w-]', '_', name.lower().strip())
                         ki_id = f"reflect_exp_{hashlib.md5(safe_name.encode()).hexdigest()[:12]}"
                         content = (

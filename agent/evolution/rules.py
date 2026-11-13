@@ -23,7 +23,7 @@ EVOLVE_RULES_PROMPT = """从以下用户反馈和偏好中，找出重复≥2次
 JSON: {{"new_rules": ["规则1"]}}，无则空数组。只输出 JSON。"""
 
 async def evolve_rules(agent) -> list[str]:
-    """从 feedback/user 记忆中提取自进化规则，写入 EVOLVED_RULES.md."""
+    """从 feedback/user 记忆中提取自进化规则，写入自学习技能的规则与偏好.md."""
     entries = agent.memory._parse_index()
     feedbacks = []
     for e in entries:
@@ -33,6 +33,15 @@ async def evolve_rules(agent) -> list[str]:
             if content:
                 clean = content.split("<!-- previous version -->")[0][:300]
                 feedbacks.append(f"{desc}\n{clean}")
+
+    # New memories live in SQLite; retain the legacy Markdown path above.
+    rows = agent.memory._get_db().execute(
+        "SELECT title, content FROM knowledge_items WHERE category IN ('feedback','user','user_profile','communication_rules') ORDER BY updated_at"
+    ).fetchall()
+    for title, content in rows:
+        item = f"{title}\n{content[:300]}"
+        if item not in feedbacks:
+            feedbacks.append(item)
 
     if len(feedbacks) < 2:
         return []

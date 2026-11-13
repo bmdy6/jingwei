@@ -1,4 +1,4 @@
-# XL Agent — 工业级 Dockerfile (v3.0)
+# XL Agent — Dockerfile (v3.0)
 # Debian 13 (Trixie) + ARG 镜像源切换
 FROM python:3.11-slim
 
