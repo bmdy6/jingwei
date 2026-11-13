@@ -1,0 +1,52 @@
+.env
+__pycache__/
+*.pyc
+.claude/
+auto_learn.err
+auto_learn.log
+.DS_Store
+.venv/
+node_modules/
+.obsidian/
+images/
+test_blue.png
+*.log
+gateway.err
+startup.log
+napcat_data/
+qrcode_login.png
+cookies.json
+bin/
+!bin/start.sh
+records/
+EVOLVED_RULES.md
+agent/memory/coworker_*.json
+agent/ui/dashboard_v2/assets/gen_*
+scratch/*
+!scratch/test_sandbox.py
+agent/model/
+/model/
+scripts/
+
+# 归档目录 (历史运行时产物)
+archive/
+
+# 记忆大脑大统一过滤控制 (Unified Brain Git Filter)
+/agent_memory/core/
+# 仅允许追踪常驻技能与动态经验目录，杜绝深夜做梦大熔炼产生的临时影子碎片对 Git 历史进行噪声刷屏
+# 允许追踪整个 agent_memory/skills/ 与 agent_memory/experiences/ 目录下的所有 .md 资产
+
+# 本地测试与扫码登录临时缓存文件
+debug_mcp.py
+qrcode_b64.txt
+qrcode_page.html
+
+# 本地运行时临时生成的数据与日志
+logs/
+
+# Antigravity IDE assets
+.agent/
+.gemini/
+openspec/
+
+.memory_test/*.db
