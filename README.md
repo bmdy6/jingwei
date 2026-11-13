@@ -84,7 +84,7 @@ flowchart TD
 .venv/bin/python -m pytest -q
 ```
 
-CI 使用 Python 3.12 安装依赖并运行离线测试，不需要真实 key。测试拦截网络连接，并将记忆和会话放入临时目录。真实 QQ 联通用例明确跳过，需要登录账号、OneBot、模型和语音服务，不能算作离线验证通过。
+CI 默认使用 GitHub 托管 Ubuntu 和 Python 3.12 安装依赖并运行离线测试，不需要真实 key。也可通过仓库变量 `CI_RUNNER` 指定预装 Python 3.12 的自托管 runner 标签。测试拦截网络连接，并将记忆和会话放入临时目录。真实 QQ 联通用例明确跳过，需要登录账号、OneBot、模型和语音服务，不能算作离线验证通过。
 
 ## 已知限制
 
