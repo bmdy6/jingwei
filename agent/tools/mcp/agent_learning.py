@@ -25,7 +25,7 @@ logger = logging.getLogger("mcp_agent_learning")
 from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("mcp-agent-learning")
 
-OBSIDIAN_AGENT_PATH = str(runtime_path("MYAGENT_NOTES_DIR", "notes") / "02-Agent技术")
+OBSIDIAN_AGENT_PATH = str(runtime_path("JINGWEI_NOTES_DIR", "notes") / "02-Agent技术")
 
 def _scan_all_notes(path: str = OBSIDIAN_AGENT_PATH) -> list[dict]:
     """递归扫描本地 Obsidian Agent 文件夹下的所有笔记."""
@@ -181,7 +181,7 @@ async def synthesize_agent_notes(topic: str, use_web_search: bool = True) -> str
         synthesized_text = res.get("content", "").strip()
         
         # 写入本地 scratch 目录保存
-        output_dir = str(runtime_path("MYAGENT_SCRATCH_DIR", "scratch"))
+        output_dir = str(runtime_path("JINGWEI_SCRATCH_DIR", "scratch"))
         os.makedirs(output_dir, exist_ok=True)
         note_path = os.path.join(output_dir, "synthesized_note.md")
         with open(note_path, "w", encoding="utf-8") as f:
@@ -330,7 +330,7 @@ async def check_and_push_podcast() -> str:
         logger.info(f"🎉 识别到音频已生成完毕！URL: {audio_url}")
         today_str = state.get("date") or datetime.now().strftime("%Y-%m-%d")
         
-        output_dir = str(runtime_path("MYAGENT_SCRATCH_DIR", "scratch"))
+        output_dir = str(runtime_path("JINGWEI_SCRATCH_DIR", "scratch"))
         os.makedirs(output_dir, exist_ok=True)
         local_path = os.path.join(output_dir, f"daily_podcast_{today_str}.wav")
         

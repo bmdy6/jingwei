@@ -1,3 +1,4 @@
+from agent.core.environment import env_get
 # -*- coding: utf-8 -*-
 """通用视觉 Agent 骨架。
 
@@ -28,7 +29,7 @@ DEFAULT_VISION_MODEL = os.getenv("VISUAL_AGENT_VISION_MODEL", "openai/mimo-v2.5"
 DEFAULT_MAX_STEPS = int(os.getenv("VISUAL_AGENT_MAX_STEPS", "5"))
 DEFAULT_CDP_URL = os.getenv("VISUAL_CDP_URL", "http://127.0.0.1:9222")
 
-DECIDE_PROMPT = """你是小萤的视觉操作引擎。根据任务、历史、记忆决定下一步。
+DECIDE_PROMPT = """你是精卫的视觉操作引擎。根据任务、历史、记忆决定下一步。
 
 任务: {task}
 已执行步骤: {history_text}
@@ -109,8 +110,8 @@ class BaseVisualAgent:
                     # 彻底绕过 LiteLLM 的私有格式化（LiteLLM 会破坏 Mimo 的 image_url 结构）
                     import urllib.request
                     import json
-                    api_base = os.getenv("MYAGENT_API_BASE", "https://api.xiaomimimo.com/v1")
-                    api_key = os.getenv("MYAGENT_API_KEY", "")
+                    api_base = env_get("JINGWEI_API_BASE", "https://api.xiaomimimo.com/v1")
+                    api_key = env_get("JINGWEI_API_KEY", "")
                     body = json.dumps({
                         "model": self.vision_model.replace("openai/", ""),
                         "messages": [{"role": "user", "content": [

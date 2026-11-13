@@ -1,5 +1,5 @@
 #!/bin/bash
-# XL Agent 统一启动管理中枢 (无星号版)
+# Jingwei 统一启动管理中枢 (无星号版)
 # 职责: 整合 start-agent.sh 与 启动QQAgent.command 的逻辑，提供参数化调用
 
 set -e
@@ -15,13 +15,17 @@ fi
 mkdir -p "$PROJECT_DIR/logs"
 
 QQ_NUMBER="${QQ_BOT_ID:-}"
-NAPCAT_DATA_DIR="$HOME/.xlagent/napcat_data"
+JINGWEI_DATA_DIR="${JINGWEI_DATA_DIR-${MYAGENT_DATA_DIR-${XL_DATA_DIR-$HOME/.jingwei}}}"
+if [ -d "$HOME/.xl-agent" ] && [ ! -e "$HOME/.jingwei" ]; then
+    echo "[Jingwei] 检测到旧数据目录 $HOME/.xl-agent；不会自动移动或删除数据，可设置 JINGWEI_DATA_DIR 使用旧目录。" >&2
+fi
+NAPCAT_DATA_DIR="$JINGWEI_DATA_DIR/napcat_data"
 mkdir -p "$NAPCAT_DATA_DIR"
 
 STARTUP_LOG="$PROJECT_DIR/logs/startup.log"
 
 echo "=========================================="
-echo "  XL Agent 统一启动中枢"
+echo "  Jingwei 统一启动中枢"
 echo "  $(date)"
 echo "==========================================" | tee -a "$STARTUP_LOG"
 
@@ -226,5 +230,5 @@ else
 fi
 
 echo "==========================================" | tee -a "$STARTUP_LOG"
-echo "  - XL Agent 启动流程全部就绪" | tee -a "$STARTUP_LOG"
+echo "  - Jingwei 启动流程全部就绪" | tee -a "$STARTUP_LOG"
 echo "==========================================" | tee -a "$STARTUP_LOG"

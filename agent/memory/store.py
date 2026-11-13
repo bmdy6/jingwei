@@ -1,3 +1,5 @@
+from agent.core.environment import env_get
+from agent.core.paths import runtime_path
 import os
 import re
 import sqlite3
@@ -22,7 +24,7 @@ CORE_FILES = {
                                    "schedule_task", "避坑", "成本", "工具", "命令", "超时", "审计"],
     "xl_architecture.md":        ["架构", "系统设计", "模块", "组件", "缓存", "DeepSeek", "FTS5", "索引"],
     "xl_code_review.md":         ["代码审查", "review", "bug", "代码质量", "代码"],
-    "xl_identity.md":            ["身份", "人格", "小萤", "自我认知", "agent定义"],
+    "xl_identity.md":            ["身份", "人格", "精卫", "小萤", "自我认知", "agent定义"],
     "xl_debugging.md":           ["调试", "debug", "排查", "日志", "traceback", "错误", "报错"],
     "xl_requirement_analysis.md": ["需求分析", "方案设计", "需求理解", "需求"],
 }
@@ -31,10 +33,10 @@ def get_kb_dir() -> str:
     """动态获取 KB_DIR，避免模块载入时的循环导入"""
     from agent.core.config import settings
     kb_cfg = settings.get("knowledge_base") or {}
-    kb_dir_cfg = os.getenv("MYAGENT_KB_DIR") or kb_cfg.get("kb_dir")
+    kb_dir_cfg = env_get("JINGWEI_KB_DIR") or kb_cfg.get("kb_dir")
     if kb_dir_cfg:
         return os.path.expanduser(kb_dir_cfg)
-    return os.getenv("MYAGENT_KB_DIR", str(Path.home() / ".xl-agent" / "notes"))
+    return str(runtime_path("JINGWEI_KB_DIR", "notes"))
 
 def get_knowledge_index() -> Path:
     return Path(get_kb_dir()) / "知识索引.md"
@@ -46,14 +48,14 @@ def get_default_routing_rules() -> str:
     if notes_paths:
         notes_root = os.path.expanduser(notes_paths[0])
     else:
-        notes_root = os.getenv("MYAGENT_NOTES_DIR", str(Path.home() / ".xl-agent" / "notes"))
+        notes_root = str(runtime_path("JINGWEI_NOTES_DIR", "notes"))
     
     return f"""# 知识路由规则
 
 学习笔记根目录: {notes_root}
 
 ## 路由判断
-1. 跟小萤自身相关（人格、行为、成长、自学习）→ 01-小萤/自学习笔记/
+1. 跟精卫自身相关（人格、行为、成长、自学习）→ 01-小萤/自学习笔记/
 2. Agent 通用技术（工具、记忆、多智能体、循环）→ 02-Agent技术/记忆系统/
 3. 具体项目经验、踩坑记录、bug修复 → 06-工作记录/工程实践/
 4. 用户知识（亮哥教给我的）→ 01-小萤/自学习笔记/

@@ -1,4 +1,5 @@
 import os
+from agent.core.paths import data_dir
 import re
 import math
 import sqlite3
@@ -54,7 +55,7 @@ def search_notes(manager, query: str, limit: int = 5) -> list[dict]:
         if manager and hasattr(manager, "base_dir"):
             notes_db = manager.base_dir / "notes.db"
         else:
-            notes_db = Path.home() / ".my-agent" / "notes.db"
+            notes_db = data_dir() / "notes.db"
             notes_db.parent.mkdir(parents=True, exist_ok=True)
             
         db = sqlite3.connect(str(notes_db))

@@ -1,10 +1,11 @@
 """执行轨迹录音 — 结构化 JSONL 记录工具调用 + 用户纠正。
 
 数据飞轮阶段 1：每次工具调用结果和用户纠正信号写入
-~/.my-agent/evolution/traces/YYYY-MM-DD.jsonl
+~/.jingwei/evolution/traces/YYYY-MM-DD.jsonl
 """
 
 import json
+from agent.core.paths import runtime_path
 import logging
 import os
 from datetime import datetime, timezone
@@ -13,7 +14,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-TRACES_DIR = Path.home() / ".my-agent" / "evolution" / "traces"
+TRACES_DIR = runtime_path("JINGWEI_TRACES_DIR", "evolution/traces")
 
 
 def _traces_file() -> Path:

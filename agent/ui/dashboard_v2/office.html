@@ -30,7 +30,7 @@ const CLR={
 const ROOMS=[
   {x:0,y:0,w:264,h:276,n:'电脑房',f:CLR.flComp},
   {x:274,y:0,w:268,h:276,n:'图书室',f:CLR.flLib},
-  {x:552,y:0,w:196,h:276,n:'XL办公室',f:CLR.flXL},
+  {x:552,y:0,w:196,h:276,n:'精卫办公室',f:CLR.flXL},
   {x:758,y:0,w:202,h:276,n:'Mimo视觉',f:CLR.flMimo},
   {x:0,y:360,w:264,h:120,n:'前台',f:CLR.flRecep},
   {x:274,y:360,w:686,h:110,n:'会议室',f:CLR.flMeet},
@@ -115,7 +115,7 @@ function drawFurniture(){
   // Window
   rect(lib.x+180,lib.y+20,20,22,CLR.win);rect(lib.x+178,lib.y+18,24,4,CLR.doorF);
 
-  // ── XL Office ──
+  // ── Jingwei Office ──
   const xl=ROOMS[2];
   rect(xl.x+30,xl.y+60,100,30,CLR.desk);
   rect(xl.x+50,xl.y+38,10,16,CLR.scrn);rect(xl.x+70,xl.y+38,10,16,CLR.scrn);
@@ -183,7 +183,7 @@ function drawAgents(){
     rect(x-2,y-6+b,2,2,'#1a1010');rect(x+1,y-6+b,2,2,'#1a1010');
     X.fillStyle=CLR.txt;X.font='6px monospace';X.fillText(l,x-l.length*2-1,y-12+b);
   }
-  agent(ROOMS[2].x+100,ROOMS[2].y+200,CLR.gold,'XL');
+  agent(ROOMS[2].x+100,ROOMS[2].y+200,CLR.gold,'Jingwei');
   agent(ROOMS[0].x+50,ROOMS[0].y+120,CLR.blue,'L1');
   agent(ROOMS[0].x+160,ROOMS[0].y+120,CLR.blue,'L2');
   agent(ROOMS[3].x+50,ROOMS[3].y+120,CLR.purp,'Mimo');

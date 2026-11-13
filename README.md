@@ -1,22 +1,22 @@
-# XL Agent
+# 精卫 / Jingwei
 
-A Python agent with tool execution, local memory, and an optional message gateway.
+精卫是一个可在终端运行的个人 Agent 项目：把自然语言请求交给模型，通过工具读写文件、执行命令，并保存会话和检索相关记忆。它适合学习 Agent 的编排与记忆实现，或作为个人自动化的起点。名字取自精卫衔石填海，对应它每次会话后复盘、把经验一点点攒成规则。
 
-XL Agent 是一个可在终端运行的个人 Agent 项目：把自然语言请求交给模型，通过工具读写文件、执行命令，并保存会话和检索相关记忆。它适合学习 Agent 的编排与记忆实现，或作为个人自动化的起点。
+Jingwei is a Python agent with tool execution, local memory, session reflection, and an optional message gateway.
 
 在仓库根目录执行以下三条命令（本轮验证环境为 Python 3.12）：
 
 ```bash
 python3.12 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
 cp .env.example .env
-.venv/bin/python main.py "只回复：你好"
+./jingwei "只回复：你好"
 ```
 
-执行第三条前，在 `.env` 中填写自己的 `DEEPSEEK_API_KEY`。默认使用 `deepseek/deepseek-chat`；本轮已用 DeepSeek 实测 `main.py` 和 `./xl` 单次对话。模型请求由你配置的服务计费。QQ 默认关闭。
+执行第三条前，在 `.env` 中填写自己的 `DEEPSEEK_API_KEY`。默认使用 `deepseek/deepseek-chat`；第 1 轮已用 DeepSeek 实测 `main.py` 和旧入口单次对话；本轮改名使用离线测试，未调用真实模型。模型请求由你配置的服务计费。QQ 默认关闭。
 
 ## 已验证的核心行为
 
-- **ReAct 循环**：模型返回工具调用，注册表执行工具并将结果交回模型，直到回答或达到 `MYAGENT_MAX_TURNS`。默认最大步数为 30；步数不等于请求费用上限，重试、子任务和复盘可能增加调用。
+- **ReAct 循环**：模型返回工具调用，注册表执行工具并将结果交回模型，直到回答或达到 `JINGWEI_MAX_TURNS`。默认最大步数为 30；步数不等于请求费用上限，重试、子任务和复盘可能增加调用。
 - **运行时工具注册**：`ToolRegistry` 支持注册、注销、生成调用定义、校验参数和派发。`manage_tool` 提供运行时管理入口。工具注册及本地文件调用有离线测试。
 - **会话与长期记忆**：会话保存为 JSONL，并建立 SQLite 全文索引；长期知识保存在 SQLite，结合 FTS5 和本地 m3e-base 向量检索。FTS5 不可用时降级为关键词匹配。本地模型缺失或加载失败时保留关键词检索，不自动下载模型。本轮另用准备好的 m3e-base 权重验证了非零向量生成、SQLite 向量保存和一次检索往返；未做召回质量评测。
 - **会话后复盘**：`on_session_end` 尝试提炼反馈、知识和重复任务模式；反馈规则写入 `agent_memory/skills/自学习技能/规则与偏好.md`，后续加入系统提示词。流程、存储和注入使用模拟模型验证；不承诺自动提炼的质量。
@@ -42,7 +42,7 @@ cp .env.example .env
 
 ```mermaid
 flowchart TD
-    CLI[main.py / xl] --> Boot[bootstrap: 配置与工具组装]
+    CLI[main.py / jingwei] --> Boot[bootstrap: 配置与工具组装]
     QQ[可选 OneBot 网关] --> Boot
     Boot --> Agent[Agent / ReAct loop]
     Agent <--> LLM[LiteLLM / 模型服务]
@@ -69,13 +69,17 @@ flowchart TD
 
 ## 配置与数据位置
 
-配置优先级为：进程环境变量 > `.env` > `config/settings.yaml`。凭据只写入本地 `.env` 或环境变量；不要提交会话、数据库、日志和登录数据。
+配置优先级为：进程环境变量 > `.env` > `config/settings.yaml`。每一层内 `JINGWEI_*` 优先于 `MYAGENT_*`、`XL_*`（按此顺序兼容读取），旧名的进程环境仍优先于新名的 `.env` 或 YAML；显式空值也保留这一顺序。凭据只写入本地 `.env` 或环境变量；不要提交会话、数据库、日志和登录数据。
 
-默认长期记忆位于 `~/.xl-agent/memory`，会话位于 `~/.xl-agent/sessions`；技能和规则位于项目的 `agent_memory/`。目录在需要时创建，项目内记忆备份默认关闭。可以通过 `.env.example` 中的路径变量重定向数据。默认不读取任何个人笔记目录。
+默认长期记忆位于 `~/.jingwei/memory`，会话位于 `~/.jingwei/sessions`；技能和规则位于项目的 `agent_memory/`。目录在需要时创建，项目内记忆备份默认关闭。设置 `JINGWEI_DATA_DIR` 可覆盖运行时数据根目录，各单项路径变量优先于根目录；YAML 中显式设置的 `memory.base_dir` 也继续生效。技能目录仍可通过 `JINGWEI_AGENT_MEMORY_DIR` 覆盖。默认不读取任何个人笔记目录。
+
+启动时若 `~/.xl-agent` 存在而 `~/.jingwei` 不存在，会在终端提示；不会自动移动或删除数据。可先设置 `JINGWEI_DATA_DIR=~/.xl-agent` 继续使用旧数据，或备份后自行迁移到新目录。
+
+`./xl` 保留为兼容别名（旧名，后续移除），参数和退出码与 `./jingwei` 相同。
 
 要使用本地向量检索，先自行准备 m3e-base 模型，放入 `model/m3e-base`，或修改 YAML 的 `memory.local_model_path`。模型权重不随代码分发。`EMBEDDING_MODE=cloud` 是可选在线模式，需要 embedding 服务凭据并可能额外计费。
 
-要启用 QQ，设置 `QQ_ENABLED=true`、`QQ_ADMIN_ID`、NapCat 地址与令牌，再按需填写用户和群白名单，运行 `python main.py --gateway`。详见[网关说明](docs/architecture/GATEWAY_CSMA_FATIGUE.md)。普通 CLI 使用 `python main.py` 进入交互模式；`./xl "问题"` 是单次入口。
+要启用 QQ，设置 `QQ_ENABLED=true`、`QQ_ADMIN_ID`、NapCat 地址与令牌，再按需填写用户和群白名单，运行 `python main.py --gateway`。详见[网关说明](docs/architecture/GATEWAY_CSMA_FATIGUE.md)。普通 CLI 使用 `./jingwei` 进入交互模式，`./jingwei --help` 查看帮助；`./jingwei "问题"` 是单次入口。
 
 ## 测试
 
@@ -84,7 +88,7 @@ flowchart TD
 .venv/bin/python -m pytest -q
 ```
 
-CI 默认使用 GitHub 托管 Ubuntu 和 Python 3.12 安装依赖并运行离线测试，不需要真实 key。也可通过仓库变量 `CI_RUNNER` 指定预装 Python 3.12 的自托管 runner 标签。测试拦截网络连接，并将记忆和会话放入临时目录。真实 QQ 联通用例明确跳过，需要登录账号、OneBot、模型和语音服务，不能算作离线验证通过。
+CI 默认使用 GitHub 托管 Ubuntu 和 Python 3.12 安装依赖并运行离线测试，不需要真实 key。当前账号消费限制导致托管 runner 无法启动，本轮以本地 pytest 结果为准，未注册自托管 runner。测试拦截网络连接，并将记忆和会话放入临时目录。真实 QQ 联通用例明确跳过，需要登录账号、OneBot、模型和语音服务，不能算作离线验证通过。
 
 ## 已知限制
 

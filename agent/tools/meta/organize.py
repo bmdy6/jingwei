@@ -1,5 +1,5 @@
-from agent.core.paths import runtime_path, PROJECT_ROOT
 """笔记自动整理工具."""
+from agent.core.paths import runtime_path, PROJECT_ROOT
 import asyncio
 import os
 import shutil
@@ -68,7 +68,7 @@ class OrganizeNotesTool(BaseTool):
             if m:
                 target_dir = m.group(1).strip()
             else:
-                target_dir = str(runtime_path("MYAGENT_NOTES_DIR", "notes"))
+                target_dir = str(runtime_path("JINGWEI_NOTES_DIR", "notes"))
             
         days_ago = args.get("days_ago", 3)
         base_path = Path(target_dir)

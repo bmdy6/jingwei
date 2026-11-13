@@ -12,6 +12,8 @@ from agent.core.config import Settings, settings
 def test_environment_wins_over_yaml(monkeypatch):
     monkeypatch.setenv("MYAGENT_API_KEY", "test-environment-key")
     monkeypatch.setenv("MYAGENT_MAX_TURNS", "2")
+    monkeypatch.delenv("JINGWEI_API_KEY", raising=False)
+    monkeypatch.delenv("JINGWEI_MAX_TURNS", raising=False)
     config = Settings()
     assert os.environ["MYAGENT_API_KEY"] == "test-environment-key"
     assert config.get("MYAGENT_MAX_TURNS") == "2"

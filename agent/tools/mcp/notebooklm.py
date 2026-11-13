@@ -1,9 +1,8 @@
-from agent.core.paths import runtime_path, PROJECT_ROOT
-"""小萤专属 NotebookLM 播客全自动投喂与查询工具.
+"""精卫专属 NotebookLM 播客全自动投喂与查询工具.
 
 提供 feed_text 发起云端生成和 query_status 触发常规 Chrome 捕获下载两大功能。
 """
-
+from agent.core.paths import runtime_path, PROJECT_ROOT
 import os
 import re
 import json

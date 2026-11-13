@@ -55,7 +55,7 @@ class SecurityManager:
             
             if now - last_reply >= 300.0:  # 5分钟冷却
                 self._non_white_cache[user_id] = now
-                reject_msg = "抱歉，我是亮哥的专属 AI 助手小萤，目前仅对主人开放私聊与管理服务哦。"
+                reject_msg = "抱歉，我是亮哥的专属 AI 助手精卫，目前仅对主人开放私聊与管理服务哦。"
                 if msg_type == "group":
                     await self.context.send_msg("group", "", group_id, f"[CQ:at,qq={user_id}] {reject_msg}")
                 else:
@@ -70,7 +70,7 @@ class SecurityManager:
 
         if raw == "暂停私聊":
             self._private_chat_paused = True
-            await self.context.send_msg("private", self.admin_id, "", "[系统提示] 已物理暂停非主人私聊，小萤将保持静默。")
+            await self.context.send_msg("private", self.admin_id, "", "[系统提示] 已物理暂停非主人私聊，精卫将保持静默。")
             return True
         elif raw == "恢复私聊":
             self._private_chat_paused = False

@@ -1,5 +1,5 @@
 #!/bin/bash
-# MyAgent - 手动停止独立 Douyin Gateway 脚本
+# Jingwei - 手动停止独立 Douyin Gateway 脚本
 # 职责: 安全、彻底地杀掉后台抖音私信网关微服务进程
 
 set -e

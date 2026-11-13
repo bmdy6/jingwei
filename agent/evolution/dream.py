@@ -325,7 +325,7 @@ async def trigger_deep_dream_evolution(agent, history_messages=None) -> str:
             
             summary_card = (
                 "### 📊 梦境回顾总结 (系统离线提炼)\n\n"
-                "由于大模型总结链接波动，小萤通过副脑为您快速整理了本次梦境精简成果：\n\n"
+                "由于大模型总结链接波动，精卫通过副脑为您快速整理了本次梦境精简成果：\n\n"
                 "#### 💡 本次睡眠提炼的硬事实\n"
                 f"* 提炼了 {ki_count} 条关于系统教训或用户偏好的核心记忆事实（已安全存入 SQLite memories.db 库）。\n\n"
                 "#### 🛠️ 技能库突变状态\n"

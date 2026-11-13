@@ -1,5 +1,6 @@
 """Error tracking with L1/L2/L3 classification + recipe matching."""
 import asyncio
+from agent.core.paths import runtime_path
 import logging
 import re
 from collections import defaultdict
@@ -61,7 +62,7 @@ class ErrorTracker:
         if storage_dir:
             self.base_dir = Path(storage_dir)
         else:
-            self.base_dir = Path.home() / ".my-agent" / "memory"
+            self.base_dir = runtime_path("JINGWEI_MEMORY_DIR", "memory")
         self.error_log = self.base_dir / "error_log.md"
         self.base_dir.mkdir(parents=True, exist_ok=True)
         self._recent: dict[str, float] = {}  # error_key → last_timestamp

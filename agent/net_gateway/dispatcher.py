@@ -112,18 +112,18 @@ class MessageDispatcher:
         return await self.fatigue_manager._sleep_and_dream_process(group_id, agent)
 
     def _is_truly_calling_me(self, text: str) -> bool:
-        """启发式分析群聊文本中提到“小萤/小荧”时，是否属于真正的直接呼唤/指令，防止抢答自作多情"""
+        """启发式分析群聊文本中提到“精卫/小荧”时，是否属于真正的直接呼唤/指令，防止抢答自作多情"""
         text = text.strip()
         if not text:
             return False
         # 1. 直接以名字开头，后接逗号、感叹号、问号、空格或直接带命令动作
-        if re.match(r"^(小萤|小荧)([，,！!？?\s]|帮|写|查|做|算|听|读|说|问|看|下|[^\w]|$)", text):
+        if re.match(r"^(精卫|小荧)([，,！!？?\s]|帮|写|查|做|算|听|读|说|问|看|下|[^\w]|$)", text):
             return True
-        # 2. 以名字结尾，前接呼应符号（如 "对吧，小萤" / "帮我看看，小荧"）
-        if re.search(r"([，,！!？?\s])(小萤|小荧)$", text):
+        # 2. 以名字结尾，前接呼应符号（如 "对吧，精卫" / "帮我看看，小荧"）
+        if re.search(r"([，,！!？?\s])(精卫|小荧)$", text):
             return True
         # 3. 消息中包含明确的问句提问或直接呼唤，且名字紧邻状态疑问词
-        if re.search(r"(小萤|小荧)(在吗|呢|好|早|晚安|出来|在不)", text):
+        if re.search(r"(精卫|小荧)(在吗|呢|好|早|晚安|出来|在不)", text):
             return True
         return False
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# MyAgent - 一键启动所有服务总控脚本
+# Jingwei - 一键启动所有服务总控脚本
 # 职责: 整合运行环境依赖自愈（Docker, NapCat, GPT-SoVITS, QQ Gateway）并最终拉起 Douyin Gateway
 
 set -e
@@ -9,7 +9,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 echo "=========================================="
-echo " 正在一键启动 MyAgent 全套系统服务..."
+echo " 正在一键启动 Jingwei 全套系统服务..."
 echo "=========================================="
 
 # 1. 优先调用系统的统一启动中枢，自愈拉起环境依赖和 QQ 大脑网关
@@ -23,5 +23,5 @@ fi
 
 echo ""
 echo "=========================================="
-echo " 🎉 MyAgent 系统核心服务一键拉起就绪！"
+echo " 🎉 Jingwei 系统核心服务一键拉起就绪！"
 echo "=========================================="

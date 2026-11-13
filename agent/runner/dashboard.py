@@ -1,3 +1,4 @@
+from agent.core.environment import env_get
 import os
 import sys
 import asyncio
@@ -11,16 +12,16 @@ async def run_dashboard_learn():
     dash = DashboardServer(port=8765)
     await dash.start()
 
-    learn_model = os.environ.get("MYAGENT_LEARN_MODEL", "")
+    learn_model = env_get("JINGWEI_LEARN_MODEL", "")
     learner = AutoLearner(agent, max_duration_minutes=5, learn_model=learn_model, dashboard=dash)
 
-    await dash.send({"agent": "xl", "event": "auto_learn_start", "name": "XL"})
+    await dash.send({"agent": "xl", "event": "auto_learn_start", "name": "精卫"})
     result = await learner.run()
 
     await dash.send({
         "agent": "xl", 
         "event": "learn_done", 
-        "name": "XL",
+        "name": "精卫",
         "action": f"{result['articles_read']} articles, {result['skills_created']} skills"
     })
     print(f"\n  完成: {result['articles_read']}篇, {result['skills_created']}技能")
@@ -46,7 +47,7 @@ async def run_dashboard():
 
     original_run = agent.run
     async def hooked_run(user_input):
-        await dash.send({"agent": "xl", "event": "user_input", "name": "XL"})
+        await dash.send({"agent": "xl", "event": "user_input", "name": "精卫"})
         async for event in original_run(user_input):
             etype = event.get("type", "")
             if etype == "tool_call":

@@ -1,4 +1,4 @@
-"""XL TUI 事件处理器 — Live 思考计时 + 实时工具展示."""
+"""Jingwei TUI 事件处理器 — Live 思考计时 + 实时工具展示."""
 
 import time
 import asyncio

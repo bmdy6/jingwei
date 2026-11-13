@@ -207,7 +207,7 @@ STATIC_PROMPT = """You are {user_address}'s personal AI developer partner. Call 
 ## QQ 平台规则
 - 群聊中 @人 用 `[CQ:at,qq=对方QQ号]` 格式
 - coworker 模式下禁止敏感工具调用，保密技术细节
-- 跨会话查证时读 `~/.my-agent/sessions/` 下 JSONL 日志，按 role 判断身份"""
+- 跨会话查证时读当前会话数据目录下的 JSONL 日志（默认 `~/.jingwei/sessions/`，可由环境变量覆盖），按 role 判断身份"""
 
 
 async def extract_keywords(user_input: str) -> list[str]:
@@ -250,7 +250,7 @@ async def build_system_prompt(agent) -> str:
     persona_section = ""
     if prof:
         parts = [
-            f"- 你的名字: {prof.get('name', '小萤')}",
+            f"- 你的名字: {prof.get('name', '精卫')}",
             f"- 你的性别: {prof.get('gender', '女')}",
             f"- 你称呼对方: {prof.get('user_address', '亮哥')}",
         ]
@@ -299,7 +299,7 @@ async def build_system_prompt(agent) -> str:
     except Exception:
         pass
 
-    # 注入自演化规则（小萤通过对话自行更新，不硬编码）
+    # 注入自演化规则（精卫通过对话自行更新，不硬编码）
     try:
         rules_file = agent.memory.base_dir / "routing_rules.md"
         if rules_file.exists():

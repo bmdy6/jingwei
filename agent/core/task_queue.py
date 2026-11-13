@@ -20,7 +20,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-QUEUE_DIR = runtime_path("MYAGENT_QUEUE_DIR", "tasks")
+QUEUE_DIR = runtime_path("JINGWEI_QUEUE_DIR", "tasks")
 
 
 def parse_natural_time(text: str):

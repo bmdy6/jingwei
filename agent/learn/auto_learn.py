@@ -8,7 +8,7 @@
   5. 保存到知识库 + agent 记忆
   6. 循环 20 分钟
 """
-
+from agent.core.environment import env_get
 import asyncio
 import json
 import logging
@@ -23,12 +23,9 @@ from .debate import ANALYZE_PROMPT, REVIEW_PROMPT
 logger = logging.getLogger(__name__)
 
 from agent.core.config import settings
+from agent.memory.store import get_kb_dir
 kb_cfg = settings.get("knowledge_base") or {}
-kb_dir_cfg = kb_cfg.get("kb_dir")
-if kb_dir_cfg:
-    KNOWLEDGE_BASE = Path(os.path.expanduser(kb_dir_cfg))
-else:
-    KNOWLEDGE_BASE = Path(os.getenv("MYAGENT_KB_DIR", str(Path.home() / "Documents" / "个人博客" / "学习笔记" / "agent自主学习的东西")))
+KNOWLEDGE_BASE = Path(get_kb_dir())
 
 CATEGORIES = ["后端", "前端", "AI", "运维", "技能"]
 
@@ -54,7 +51,7 @@ class AutoLearner:
         self._seen_urls: set = set()
         self._seen_files: set = set()
         self._learn_model = learn_model or agent.llm.model
-        self._review_model = os.getenv("MYAGENT_REVIEW_MODEL") or agent.llm.model
+        self._review_model = env_get("JINGWEI_REVIEW_MODEL") or agent.llm.model
         
         from .debate import DebateSystem
         self.debate_system = DebateSystem(agent, self._learn_model, self._review_model)

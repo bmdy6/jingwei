@@ -1,11 +1,11 @@
-# XL Agent — Dockerfile (v3.0)
+# Jingwei — Dockerfile (v3.0)
 # Debian 13 (Trixie) + ARG 镜像源切换
 FROM python:3.11-slim
 
 ARG USE_MIRROR=false
 
 ENV PYTHONUNBUFFERED=1
-ENV XLA_MEM_DIR=/root/.xlagent
+ENV JINGWEI_DATA_DIR=/root/.jingwei
 
 WORKDIR /app
 
@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p ${XLA_MEM_DIR}
+RUN mkdir -p ${JINGWEI_DATA_DIR}
 
 EXPOSE 8765
 

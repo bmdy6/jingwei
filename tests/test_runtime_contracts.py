@@ -67,7 +67,7 @@ async def test_learned_rules_are_injected_from_sqlite_feedback(tmp_path):
     await memory.save("feedback1", "[feedback] response preference", "回答请简短")
     await memory.save("feedback2", "[feedback] response preference", "请用短句回复")
     llm = SimpleNamespace(chat=AsyncMock(return_value={"content": '{"new_rules":["用户偏好: 简短回复"]}'}))
-    agent = SimpleNamespace(memory=memory, llm=llm, _persona_cache={"name": "XL", "user_address": "用户"}, role="admin")
+    agent = SimpleNamespace(memory=memory, llm=llm, _persona_cache={"name": "精卫", "user_address": "用户"}, role="admin")
     assert await evolve_rules(agent) == ["用户偏好: 简短回复"]
     assert "用户偏好: 简短回复" in await build_system_prompt(agent)
 

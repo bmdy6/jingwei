@@ -2,7 +2,7 @@
 
 支持本地图片路径。base64 编码 → 调 Mimo vision API → 返回文字描述。
 """
-
+from agent.core.environment import env_get
 import base64
 import logging
 import mimetypes
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # Mimo vision API 配置
 VISION_API_BASE = "https://api.xiaomimimo.com/v1"
 VISION_MODEL = "mimo-v2.5"
-VISION_API_KEY = os.getenv("MYAGENT_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
+VISION_API_KEY = env_get("JINGWEI_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"}
 

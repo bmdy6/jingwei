@@ -334,9 +334,9 @@ async def send_voice_qq(context, msg_type: str, user_id: str, group_id: str, tex
         await context.send_msg(msg_type, user_id, group_id, text, skip_delay=is_test)
 
 def parse_voice_test_command(raw_text: str):
-    """解析小萤专属语音测试指令"""
+    """解析精卫专属语音测试指令"""
     raw_strip = raw_text.strip()
-    if not raw_strip.startswith(("小萤语音测试：", "小萤语音测试:")):
+    if not raw_strip.startswith(("精卫语音测试：", "精卫语音测试:")):
         return None, None
         
     test_cmd = raw_strip[7:].strip()

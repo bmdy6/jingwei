@@ -16,9 +16,14 @@ import re
 import shutil
 import zipfile
 from datetime import datetime
+import sys
+
+# Support direct execution from scripts/ as well as module invocation.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from agent.core.paths import runtime_path
 
 # 物理沙箱锁定
-NOTES_DIR = os.getenv("MYAGENT_NOTES_DIR", str(Path.home() / ".xl-agent" / "notes"))
+NOTES_DIR = str(runtime_path("JINGWEI_NOTES_DIR", "notes"))
 ARCHIVE_DIR = os.path.join(NOTES_DIR, ".archive")
 ATTACHMENTS_DIR = os.path.join(NOTES_DIR, ".attachments")
 

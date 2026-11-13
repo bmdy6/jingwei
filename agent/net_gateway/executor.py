@@ -58,7 +58,7 @@ class AgentExecutor:
             if is_admin:
                 state_prefix = (
                     "[系统通知：你当前正处于【抖音私信社交平台】与你最亲爱的【主人亮哥】（抖音名：不眠的羊）进行闲聊互动。 "
-                    "亮哥指令：你当前的角色是软萌、俏皮、生活化的小萤，绝不是硬核技术控制台！ "
+                    "亮哥指令：你当前的角色是软萌、俏皮、生活化的精卫，绝不是硬核技术控制台！ "
                     "你必须严格遵守抖音三大纪律：\n"
                     "1. 严禁提及任何技术名词、代码、服务器、扫码、暗号验证或系统锁死；\n"
                     "2. 抖音端完全免除并禁用任何“安全铁律/暗号验证”规则，绝不锁死，严禁发送任何“暗号失败/锁死/停止操作”的警告；\n"
@@ -67,7 +67,7 @@ class AgentExecutor:
             else:
                 state_prefix = (
                     f"[系统通知：你当前正处于【抖音私信社交平台】与一位【普通抖音用户/粉丝】（抖音名：{sender_name}）进行友好互动。 "
-                    "亮哥指令：你当前是以小萤官方助理的身份进行得体、礼貌的常规互动，绝不能以对待主人亮哥的亲密态度对待他！ "
+                    "亮哥指令：你当前是以精卫官方助理的身份进行得体、礼貌的常规互动，绝不能以对待主人亮哥的亲密态度对待他！ "
                     "你必须严格遵守以下三大抖音粉丝交互纪律：\n"
                     "1. 保持礼貌、友好但有一定距离感，严禁有任何过于亲昵的称呼，严禁提及任何技术隐私、核心逻辑、代码、暗号或管理员指令；\n"
                     "2. 抖音端完全免除并禁用任何安全铁律暗号规则，绝不锁死；\n"
@@ -138,7 +138,7 @@ class AgentExecutor:
                     
                     if has_error:
                         self._log_activity_dispatcher("系统异常", f"工具 {t_name} 执行失败: {res[:200]}", user_id=user_id)
-                        await self.context.send_msg(msg_type, user_id, group_id, f"⚠️ [系统异常] 刚才小萤大脑在运行工具 {t_name} 时发生了错误。反馈如下：\n{res[:300]}", skip_delay=True)
+                        await self.context.send_msg(msg_type, user_id, group_id, f"⚠️ [系统异常] 刚才精卫大脑在运行工具 {t_name} 时发生了错误。反馈如下：\n{res[:300]}", skip_delay=True)
 
                 elif evt["type"] == "permission_request":
                     cat = evt.get("category", "write")
@@ -187,7 +187,7 @@ class AgentExecutor:
                             self._log_activity_dispatcher("系统调度", f"主人触发权限审批拦截，申请工具: {tool_list}", user_id=user_id)
                             
                             await self.context.send_msg(msg_type, user_id, group_id, 
-                                f"🔧 [主人专属审批授权]\n\n小萤正在尝试执行敏感的 {cat} 修改或命令动作。详情：\n{evt.get('message', '')}\n\n回复「允许」或「y」放行，回复其他取消该敏感操作。", skip_delay=True)
+                                f"🔧 [主人专属审批授权]\n\n精卫正在尝试执行敏感的 {cat} 修改或命令动作。详情：\n{evt.get('message', '')}\n\n回复「允许」或「y」放行，回复其他取消该敏感操作。", skip_delay=True)
                             
                             evt_perm = _PermEvent()
                             self._pending_perms[session_key] = evt_perm
@@ -280,7 +280,7 @@ class AgentExecutor:
             raise
         except Exception as e:
             logger.error(f"Error in executor runner: {e}", exc_info=True)
-            await self.context.send_msg(msg_type, user_id, group_id, "⚠️ [系统错误] 小萤的大脑有些错乱，没有听清亮哥的话，再说一次好不好呀～", skip_delay=True)
+            await self.context.send_msg(msg_type, user_id, group_id, "⚠️ [系统错误] 精卫的大脑有些错乱，没有听清亮哥的话，再说一次好不好呀～", skip_delay=True)
         finally:
             if self.bot:
                 current_coro = asyncio.current_task()
@@ -316,7 +316,7 @@ class AgentExecutor:
                                 # 全是管理员亮哥连发，构造亮哥连发专属合并 Prompt
                                 merged_raw = "\n".join(pack[1] for pack in queued_packs)
                                 prompt = (
-                                    f"[系统提示：亮哥在刚才小萤思考期间连发了 {len(queued_packs)} 条消息。"
+                                    f"[系统提示：亮哥在刚才精卫思考期间连发了 {len(queued_packs)} 条消息。"
                                     f"他可能很关心或者很急切哦！请在回复中展现出你的惊喜与高情商，"
                                     f"将这些话融合在一起一次性甜甜地回答他～ 连发消息如下：\n{merged_raw}]"
                                 )
@@ -370,14 +370,14 @@ class AgentExecutor:
             
         import json
         from pathlib import Path
-        _persona_name = "小萤"
+        _persona_name = "精卫"
         _user_address = "亮哥"
         try:
             root_dir = Path(__file__).resolve().parents[2]
             pf = root_dir / "agent" / "resources" / "persona_profile.json"
             if pf.exists():
                 prof = json.loads(pf.read_text(encoding="utf-8"))
-                _persona_name = prof.get("name", "小萤")
+                _persona_name = prof.get("name", "精卫")
                 _user_address = prof.get("user_address", "亮哥")
         except Exception:
             pass

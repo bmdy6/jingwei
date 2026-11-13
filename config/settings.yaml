@@ -1,9 +1,9 @@
 # 优先级：进程环境变量 > .env > 本文件。不要在此文件写入真实凭据。
 # QQ 默认关闭；开启需 QQ_ENABLED=true、QQ_ADMIN_ID、NAPCAT_WS_URL/HTTP_URL，按需设白名单。
-MYAGENT_MODEL: deepseek/deepseek-chat
-MYAGENT_API_KEY: ''
-MYAGENT_API_BASE: https://api.deepseek.com/v1
-MYAGENT_MAX_TURNS: 30
+JINGWEI_MODEL: deepseek/deepseek-chat
+JINGWEI_API_KEY: ''
+JINGWEI_API_BASE: https://api.deepseek.com/v1
+JINGWEI_MAX_TURNS: 30
 QQ_ADMIN_ID: ''
 MY_AGENT_WHITE_LIST: ''
 QQ_WHITE_GROUPS: ''
@@ -17,8 +17,8 @@ STITCH_SERVER_CMD: ''
 STITCH_TIMEOUT: 180
 EMBEDDING_MODE: local
 DEEPSEEK_API_KEY: ''
-MYAGENT_MODEL_FLASH: ''
-MYAGENT_MODEL_PRO: ''
+JINGWEI_MODEL_FLASH: ''
+JINGWEI_MODEL_PRO: ''
 IMAGE2_BASE: ''
 IMAGE2_USER: ''
 IMAGE2_PASS: ''
@@ -31,7 +31,7 @@ TENCENT_CLOUD_SECRET_KEY: ''
 TENCENT_CLOUD_COS_BUCKET: ''
 TENCENT_CLOUD_COS_REGION: ap-guangzhou
 memory:
-  base_dir: ~/.xl-agent/memory
+  base_dir: ''  # 默认 JINGWEI_DATA_DIR/memory（未设置时 ~/.jingwei/memory）
   backup_dir: ./agent_memory/core
   auto_backup_to_project: false
   multi_instance_isolation: true

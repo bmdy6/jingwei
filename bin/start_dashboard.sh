@@ -2,7 +2,7 @@
 cd "$(dirname "$0")/.."
 source venv/bin/activate
 
-echo "👑 XL Agent — Pixel Dashboard"
+echo "👑 Jingwei — Pixel Dashboard"
 echo ""
 
 # 杀旧进程

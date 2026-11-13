@@ -15,10 +15,10 @@ def test_path_protection():
     assert Agent.is_path_protected("Dockerfile") is True
     assert Agent.is_path_protected("requirements.txt") is True
 
-    # 验证自由安全区 (logs/, .my-agent/memory/, 临时文件等)
+    # 验证自由安全区 (logs/, .jingwei/memory/, 临时文件等)
     assert Agent.is_path_protected("logs/agent_activity.log") is False
     assert Agent.is_path_protected("logs/test.log") is False
-    assert Agent.is_path_protected(".my-agent/memory/xl_identity.md") is False
+    assert Agent.is_path_protected(".jingwei/memory/xl_identity.md") is False
     assert Agent.is_path_protected("agent_mem/cache.db") is False
     assert Agent.is_path_protected("exported_report.txt") is False
 

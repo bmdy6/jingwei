@@ -20,7 +20,7 @@ async def test_resolve_adaptive_path():
     assert resolved == (proj_root / ".memory_temp_test").resolve()
     
     # 2. 验证 Home 目录自愈展开：~ 开头应该展开为用户 Home 目录
-    home_path_str = "~/.my-agent_temp_test"
+    home_path_str = "~/.jingwei_temp_test"
     resolved_home = manager.resolve_adaptive_path(home_path_str)
     assert resolved_home == Path(os.path.expanduser(home_path_str)).resolve()
 

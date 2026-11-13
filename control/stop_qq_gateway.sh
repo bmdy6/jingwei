@@ -1,5 +1,5 @@
 #!/bin/bash
-# MyAgent - 手动停止 QQ Gateway 脚本
+# Jingwei - 手动停止 QQ Gateway 脚本
 # 职责: 安全、彻底地杀掉 QQ 网关服务。支持 launchd 系统级卸载与后台进程强杀。
 
 set -e

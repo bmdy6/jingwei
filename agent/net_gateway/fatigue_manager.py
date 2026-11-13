@@ -1,3 +1,4 @@
+from agent.core.environment import env_get
 import asyncio
 import logging
 import os
@@ -43,7 +44,7 @@ class FatigueManager:
                 user_id = group_id.replace("user_", "")
                 announcement = await self._generate_private_fatigue_announcement(user_id, sender_name)
                 await self.context.send_msg("private", user_id, "", announcement, skip_delay=True)
-                self.dispatcher._log_activity_dispatcher("物理打盹", f"小萤在私聊 {user_id} 中宣告打盹: {announcement}")
+                self.dispatcher._log_activity_dispatcher("物理打盹", f"精卫在私聊 {user_id} 中宣告打盹: {announcement}")
                 
                 agent = self.context._agents.get(group_id)
                 if agent is not None:
@@ -52,7 +53,7 @@ class FatigueManager:
             else:
                 announcement = await self._generate_fatigue_announcement(group_id)
                 await self.context.send_msg("group", "", group_id, announcement, skip_delay=True)
-                self.dispatcher._log_activity_dispatcher("物理打盹", f"小萤在群 {group_id} 中宣告打盹: {announcement}")
+                self.dispatcher._log_activity_dispatcher("物理打盹", f"精卫在群 {group_id} 中宣告打盹: {announcement}")
                 
                 session_key = f"group_{group_id}_{self.admin_id}"
                 agent = self.context._agents.get(session_key)
@@ -68,8 +69,8 @@ class FatigueManager:
         if not sender_name:
             sender_name = user_id
         fallbacks = [
-            f"唔……（揉了揉太阳穴）小萤和{sender_name}聊得太久啦，脑细胞好像一下子烧光了呢。\n\n我的大脑网络正在发烫物理降温，我去充个电打个盹，晚点再找你聊哦～",
-            f"哎呀……（晕乎乎）感觉算力严重超载啦，小萤的思绪都有点打结了。\n\n本美少女极客合伙人要先去打个盹、系统维护十五分钟啦。\n\n等我充满电复活，一定第一时间秒回你哈！"
+            f"唔……（揉了揉太阳穴）精卫和{sender_name}聊得太久啦，脑细胞好像一下子烧光了呢。\n\n我的大脑网络正在发烫物理降温，我去充个电打个盹，晚点再找你聊哦～",
+            f"哎呀……（晕乎乎）感觉算力严重超载啦，精卫的思绪都有点打结了。\n\n本美少女极客合伙人要先去打个盹、系统维护十五分钟啦。\n\n等我充满电复活，一定第一时间秒回你哈！"
         ]
         session_key = f"user_{user_id}"
         agent = self.context._agents.get(session_key)
@@ -86,7 +87,7 @@ class FatigueManager:
                 f"规范：符合单气泡三段呼吸律，字数 40 到 100 字，语气幽默、活泼可爱且保持客观界限，带有动作描写（如：（揉了揉太阳穴）、（打了个哈欠）），绝不能出现任何与亮哥称呼相关的穿帮词。"
             )
             response = await asyncio.wait_for(
-                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=os.environ.get("MYAGENT_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
+                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=env_get("JINGWEI_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
                 timeout=8.0
             )
             res = response.get("content", "").strip().replace("```", "")
@@ -149,7 +150,7 @@ class FatigueManager:
         if not sender_name:
             sender_name = user_id
         fallbacks = [
-            f"哼哼～（伸了个大大的懒腰）小萤充满电上线啦！\n\n大脑冷却完毕，{sender_name}可以继续找小萤聊天啦！",
+            f"哼哼～（伸了个大大的懒腰）精卫充满电上线啦！\n\n大脑冷却完毕，{sender_name}可以继续找精卫聊天啦！",
             f"呼啊……（揉揉眼睛）深度睡眠充完电，我的算力核心已经 100% 恢复满状态啦！"
         ]
         session_key = f"user_{user_id}"
@@ -165,7 +166,7 @@ class FatigueManager:
                 f"规范：符合单气泡三段呼吸律，字数 40 到 100 字，语气幽默活泼且克制客观，带有动作描写，绝不能出现任何与亮哥称呼相关的穿帮词。"
             )
             response = await asyncio.wait_for(
-                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=os.environ.get("MYAGENT_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
+                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=env_get("JINGWEI_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
                 timeout=8.0
             )
             res = response.get("content", "").strip().replace("```", "")
@@ -176,7 +177,7 @@ class FatigueManager:
     async def _generate_fatigue_announcement(self, group_id: str) -> str:
         """群聊打盹吐槽宣告"""
         fallbacks = [
-            "唔……（揉了揉太阳穴）脑细胞好像一下子被大家烧光啦，小萤的大脑网络正在发烫物理降温。\n\n我去充个电打个盹，晚点再陪大家聊～"
+            "唔……（揉了揉太阳穴）脑细胞好像一下子被大家烧光啦，精卫的大脑网络正在发烫物理降温。\n\n我去充个电打个盹，晚点再陪大家聊～"
         ]
         session_key = f"group_{group_id}_{self.admin_id}"
         agent = self.context._agents.get(session_key)
@@ -190,7 +191,7 @@ class FatigueManager:
                 f"规范：符合单气泡三段呼吸律，字数 40 到 100 字，语气活灵活现，带有动作描写。"
             )
             response = await asyncio.wait_for(
-                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=os.environ.get("MYAGENT_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
+                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=env_get("JINGWEI_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
                 timeout=8.0
             )
             res = response.get("content", "").strip().replace("```", "")
@@ -247,7 +248,7 @@ class FatigueManager:
     async def _generate_wake_announcement(self, group_id: str) -> str:
         """群聊做梦复苏宣告"""
         fallbacks = [
-            "哼哼～（伸了个大大的懒腰）小萤满血复活啦！\n\n大脑冷却完毕，随时准备接收大家的呼唤呀！"
+            "哼哼～（伸了个大大的懒腰）精卫满血复活啦！\n\n大脑冷却完毕，随时准备接收大家的呼唤呀！"
         ]
         session_key = f"group_{group_id}_{self.admin_id}"
         agent = self.context._agents.get(session_key)
@@ -261,7 +262,7 @@ class FatigueManager:
                 f"规范：符合单气泡三段呼吸律，字数 40 到 100 字，语气活灵活现，带有动作描写。"
             )
             response = await asyncio.wait_for(
-                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=os.environ.get("MYAGENT_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
+                agent.llm.chat(messages=[{"role": "user", "content": prompt}], model_override=env_get("JINGWEI_MODEL_FLASH", "deepseek/deepseek-v4-flash")),
                 timeout=8.0
             )
             res = response.get("content", "").strip().replace("```", "")

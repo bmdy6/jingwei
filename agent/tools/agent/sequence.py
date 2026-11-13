@@ -1,6 +1,6 @@
 """RunSequence — 链式执行多个工具调用（减少 LLM 往返）.
 
-XL 可以一次性定义多个步骤，tools 会按顺序执行并返回所有结果。
+精卫可以一次性定义多个步骤，tools 会按顺序执行并返回所有结果。
 参考: tinypace TaskTracker, CC coordinator
 """
 

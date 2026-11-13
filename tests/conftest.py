@@ -4,7 +4,7 @@ import os
 import tempfile
 
 # Apply before collection-time imports resolve home-based paths.
-_test_home = tempfile.TemporaryDirectory(prefix="xl-agent-test-home-")
+_test_home = tempfile.TemporaryDirectory(prefix="jingwei-test-home-")
 os.environ["HOME"] = _test_home.name
 import socket
 
@@ -28,7 +28,7 @@ def isolated_runtime(tmp_path, monkeypatch):
         "multi_instance_isolation": False,
     }
     settings._data["knowledge_base"] = {"notes_paths": [], "kb_dir": str(tmp_path / "notes")}
-    monkeypatch.setenv("MYAGENT_KB_DIR", str(tmp_path / "notes"))
+    monkeypatch.setenv("JINGWEI_KB_DIR", str(tmp_path / "notes"))
     monkeypatch.setenv("EMBEDDING_MODE", "local")
     monkeypatch.setattr("agent.evolution.traces.TRACES_DIR", tmp_path / "traces")
     for name, suffix in [("AGENT_MEMORY_DIR", ""), ("SKILLS_DIR", "skills"),

@@ -1,6 +1,6 @@
-from agent.core.paths import runtime_path, PROJECT_ROOT
 """NotebookLM MCP 客户端接口与高保真静默下载器 (自 auto_podcast 解耦)"""
-
+from agent.core.environment import env_get
+from agent.core.paths import runtime_path, PROJECT_ROOT
 import os
 import json
 import logging
@@ -17,7 +17,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 def get_notebooklm_config():
     """获取动态解析的 notebooklm 集中配置项"""
     cfg = settings.get("notebooklm", {})
-    vpath = os.getenv("MYAGENT_NOTES_DIR") or cfg.get("vault_path") or str(runtime_path("MYAGENT_NOTES_DIR", "notes"))
+    vpath = env_get("JINGWEI_NOTES_DIR") or cfg.get("vault_path") or str(runtime_path("JINGWEI_NOTES_DIR", "notes"))
     bpath = os.getenv("NOTEBOOKLM_BIN") or cfg.get("bin_path") or "notebooklm-mcp"
     env = cfg.get("env") or {}
     return vpath, bpath, env
@@ -50,7 +50,7 @@ class NotebookLMMCPClient:
         await self._send_request("initialize", {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
-            "clientInfo": {"name": "xl-podcast-client", "version": "1.0"}
+            "clientInfo": {"name": "jingwei-podcast-client", "version": "1.0"}
         })
         await self._send_notification("notifications/initialized", {})
         logger.info("✅ NotebookLM MCP 初始化序列完成")

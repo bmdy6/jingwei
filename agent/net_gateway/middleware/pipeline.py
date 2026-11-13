@@ -179,7 +179,7 @@ class QuickReplyMiddleware(EventMiddleware):
                 await send_voice(dispatcher.context, msg_type, user_id, group_id, test_text, test_style, is_test=True)
             else:
                 await dispatcher.context.send_msg(msg_type, user_id, group_id,
-                    "请输入要合成的文本，格式：小萤语音测试：[委屈] 小萤好难过呀", skip_delay=True)
+                    "请输入要合成的文本，格式：精卫语音测试：[委屈] 精卫好难过呀", skip_delay=True)
             return True
 
         return False
@@ -239,7 +239,7 @@ class TaskDispatcherMiddleware(EventMiddleware):
                 )
             except asyncio.TimeoutError:
                 logger.error(f"⏳ [超时熔断] 会话 {session_key} 任务运行超过 90 秒，强行物理熔断！")
-                await dispatcher.context.send_msg(msg_type, user_id, group_id, "⚠️ [系统提示] 小萤的大脑刚被卡住啦，本次任务已超时中断，亮哥可以重新对我说点别的哦～", skip_delay=True)
+                await dispatcher.context.send_msg(msg_type, user_id, group_id, "⚠️ [系统提示] 精卫的大脑刚被卡住啦，本次任务已超时中断，亮哥可以重新对我说点别的哦～", skip_delay=True)
             except Exception as e:
                 logger.error(f"Error in runner wrapper for {session_key}: {e}", exc_info=True)
 

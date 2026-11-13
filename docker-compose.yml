@@ -19,25 +19,25 @@ services:
       - agent-net
 
   # AI Agent
-  xl-agent:
+  jingwei:
     build:
       context: .
       args:
         - USE_MIRROR=${USE_MIRROR:-false}
-    container_name: xl-agent
+    container_name: jingwei
     restart: always
     depends_on:
       - napcat
     environment:
       - NAPCAT_WS_URL=ws://napcat:3001
       - NAPCAT_HTTP_URL=http://napcat:3000  # 容器内端口不变
-      - MYAGENT_MODEL=${MYAGENT_MODEL}
-      - MYAGENT_API_KEY=${MYAGENT_API_KEY}
-      - MYAGENT_API_BASE=${MYAGENT_API_BASE}
+      - JINGWEI_MODEL=${JINGWEI_MODEL-${MYAGENT_MODEL-${XL_MODEL-}}}
+      - JINGWEI_API_KEY=${JINGWEI_API_KEY-${MYAGENT_API_KEY-${XL_API_KEY-}}}
+      - JINGWEI_API_BASE=${JINGWEI_API_BASE-${MYAGENT_API_BASE-${XL_API_BASE-}}}
     ports:
       - "8765:8765"  # Dashboard + API
     volumes:
-      - ./agent_mem:/root/.xlagent # 记忆持久化
+      - ./agent_mem:/root/.jingwei # 记忆持久化
       - .:/app # 方便代码热更新
     networks:
       - agent-net

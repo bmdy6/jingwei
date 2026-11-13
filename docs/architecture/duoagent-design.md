@@ -90,5 +90,5 @@
 
 1. 后端：FastAPI + SSE（已完成）
 2. 前端：Stitch 生成 HTML/CSS
-3. Agent：XL 的 LLM 客户端，每个角色带不同 persona
+3. Agent：Jingwei 的 LLM 客户端，每个角色带不同 persona
 4. 接入：用户在浏览器打开，设置话题 → 开始 → 看讨论
