@@ -20,6 +20,11 @@ cp .env.example .env
 
 执行第三条前，在 `.env` 中填写自己的 `DEEPSEEK_API_KEY`。默认使用 `deepseek/deepseek-chat`，模型请求由你配置的服务计费。QQ 网关默认关闭。
 
+<!-- readme-illustrate:cli-run -->
+<img src="docs/images/cli-run.png" alt="终端里运行 ./jingwei：模型调用 bash 工具数出 agent/tools 下有 6 个 .py 文件并回答" width="760">
+
+真实运行：一次单次对话，模型调用 `bash` 工具后作答（DeepSeek，2026-11-17，输出去掉了等待动画）。
+<!-- /readme-illustrate:cli-run -->
 ## 核心能力
 
 每项都写明验证到哪一步。
